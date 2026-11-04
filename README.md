@@ -133,4 +133,4 @@ backend/scripts         seed_demo.py (داده نمایشی)
 - کار هر نفر روی `feature/<name>` و merge با `--no-ff` به `develop`.
 - پیام commitها Conventional Commits است: `feat|fix|test|docs|chore(scope): چرا این تغییر`.
 - remote تنظیم نشده و چیزی push نشده؛ `.env`، `.dev-outbox.log` و فایل‌های runtime Celery در
-  `.gitignore` هستند و only `.env.example` با placeholder commit می‌شود.
+  `.gitignore` هستند و فقط `.env.example` با placeholder commit می‌شود.
