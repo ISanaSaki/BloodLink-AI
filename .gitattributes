@@ -1,0 +1,9 @@
+# Windows checkouts otherwise rewrite every source file to CRLF, which produces
+# whole-file diffs between teammates.
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.ico binary
+*.woff binary
+*.docx binary
