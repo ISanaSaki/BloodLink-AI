@@ -21,7 +21,7 @@
 cd "D:/Blood Donation/blood-donation-system"
 
 # 1) دیتابیس و Redis
-docker compose up -d db redis                 # postgres روی host:5433
+docker compose up -d db redis                 # postgres روی host:5433، redis روی host:6380
 
 # 2) محیط پایتون
 cd backend
@@ -30,7 +30,7 @@ NO_PROXY='*' pip install -e ".[dev]"
 
 # 3) تنظیمات (فایل واقعی .env هرگز commit نمی‌شود)
 cp ../.env.example .env                       # بعد SECRET_KEY را عوض کنید
-# برای اجرای لوکال بدون Docker، DATABASE_URL را روی 127.0.0.1:5433 بگذارید
+# مقدارهای پیش‌فرض برای اجرای روی host ساخته شده‌اند (۵۴۳۳ و ۶۳۸۰)
 
 # 4) مهاجرت و داده نمایشی
 NO_PROXY='*' python -m alembic upgrade head
@@ -45,33 +45,23 @@ Swagger: `http://localhost:8000/docs` — سلامت: `GET /api/v1/health`.
 ### Worker و Beat (اختیاری در دمو)
 
 ```bash
-celery -A app.tasks.celery_app worker --loglevel=INFO   # اجرای دیگر، همان backend
+celery -A app.tasks.celery_app worker --loglevel=INFO --pool=solo -Q notifications,default
 celery -A app.tasks.celery_app beat   --loglevel=INFO
 ```
+
+`--pool=solo` مخصوص ویندوز است؛ API، worker و beat باید هر سه همان broker را ببینند
+(`.env.example` به Redis کانتینر روی پورت ۶۳۸۰ اشاره می‌کند).
 
 Beat تسک `check-dispatch-timeout` را هر ۶۰ ثانیه اجرا می‌کند: درخواست‌های گذشته را `expired` می‌کند و
 **مرحله بعدی فراخوان را آزاد می‌کند**. اگر Beat خاموش باشد، فقط مرحله اول ارسال می‌شود — این رفتار عمدی است
 (تصمیم ۰۰۰۳) و ارسال بی‌رویه مرحله‌های بعدی جایگزین آن نیست.
 
-روی ویندوز کارگر با `--pool=solo` اجرا می‌شود:
+Redis باید ۶ یا بالاتر باشد. اگر روی ماشین از قبل Redis 5 روی ۶۳۷۹ اجراست، کارگر موقع start با
+`Error running script ... ERR syntax error` می‌ایستد — آن اسکریپت Lua خود kombu است، نه کد پروژه؛
+همین دلیل پورت ۶۳۸۰ در compose است.
 
-```bash
-celery -A app.tasks.celery_app worker --loglevel=INFO --pool=solo -Q notifications,default
-```
-
-Redis باید نسخه ۶ یا بالاتر باشد (تصویر compose `redis:7-alpine` است). اگر روی ماشین از قبل Redis 5 روی
-پورت ۶۳۷۹ اجراست، کارگر هنگام start با خطای `Error running script ... ERR syntax error` می‌ایستد — این
-اسکریپت Lua خود kombu است، نه کد پروژه. راه‌حل: یک Redis ۷ در پورت دیگر بالا بیاورید و هر سه آدرس را به آن
-برگردانید (API، worker و beat باید همان broker را داشته باشند):
-
-```bash
-docker run -d --name bdonation-redis -p 6380:6379 redis:7-alpine
-CELERY_BROKER_URL='redis://127.0.0.1:6380/1' CELERY_RESULT_BACKEND='redis://127.0.0.1:6380/2' REDIS_URL='redis://127.0.0.1:6380/0' \
-  celery -A app.tasks.celery_app worker --loglevel=INFO --pool=solo -Q notifications,default
-```
-
-نمونه‌ی واقعیِ ارسال مرحله‌ای (با `DISPATCH_BATCH_SIZE=1` و `DISPATCH_RESPONSE_WINDOW_MINUTES=1`): مرحله ۱ در
-لحظه dispatch به `sent` می‌رسد، مرحله ۲ در تیک بعدی Beat و مرحله ۳ در تیک بعد از آن.
+سنجش زنده با `DISPATCH_BATCH_SIZE=1` و `DISPATCH_RESPONSE_WINDOW_MINUTES=1`: مرحله ۱ در لحظه dispatch به
+`sent` رسید (mock-000000)، مرحله ۲ در تیک Beat بعدی و مرحله ۳ در تیک پس از آن — سه پیامک، هر کدام با لینک پاسخ.
 
 ## ۳. تست
 
