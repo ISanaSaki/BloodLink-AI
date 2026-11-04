@@ -126,3 +126,11 @@ backend/app/tasks       Celery worker/beat
 backend/app/api/v1      endpointهای ثنا + بلاک ثبت routerهای اسرا
 backend/scripts         seed_demo.py (داده نمایشی)
 ```
+
+## ۷. گیت (بخش ۱۶ سند)
+
+- `main` نسخه پایدار، `develop` محل یکپارچه‌سازی — **اسرا و شقایق از `develop` شاخه می‌زنند**.
+- کار هر نفر روی `feature/<name>` و merge با `--no-ff` به `develop`.
+- پیام commitها Conventional Commits است: `feat|fix|test|docs|chore(scope): چرا این تغییر`.
+- remote تنظیم نشده و چیزی push نشده؛ `.env`، `.dev-outbox.log` و فایل‌های runtime Celery در
+  `.gitignore` هستند و only `.env.example` با placeholder commit می‌شود.
