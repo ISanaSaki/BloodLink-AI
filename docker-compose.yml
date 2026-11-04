@@ -20,7 +20,10 @@ services:
   redis:
     image: redis:7-alpine
     ports:
-      - "6379:6379"
+      # Host port 6380: many machines already run Redis 5 on 6379, and kombu's Lua
+      # visibility script fails there at worker start. Inside compose the service is
+      # still `redis:6379`.
+      - "6380:6379"
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
@@ -31,7 +34,10 @@ services:
     build: ./backend
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000
     env_file:
-      - .env
+      # Optional: `docker compose up -d db redis` works on a fresh clone, before anyone
+      # has copied .env.example. Containers override the URLs below anyway.
+      - path: .env
+        required: false
     environment:
       DATABASE_URL: postgresql+psycopg://postgres:postgres@db:5432/blood_donation
       REDIS_URL: redis://redis:6379/0
@@ -49,7 +55,10 @@ services:
     build: ./backend
     command: celery -A app.tasks.celery_app worker --loglevel=INFO
     env_file:
-      - .env
+      # Optional: `docker compose up -d db redis` works on a fresh clone, before anyone
+      # has copied .env.example. Containers override the URLs below anyway.
+      - path: .env
+        required: false
     environment:
       DATABASE_URL: postgresql+psycopg://postgres:postgres@db:5432/blood_donation
       REDIS_URL: redis://redis:6379/0
@@ -65,7 +74,10 @@ services:
     build: ./backend
     command: celery -A app.tasks.celery_app beat --loglevel=INFO
     env_file:
-      - .env
+      # Optional: `docker compose up -d db redis` works on a fresh clone, before anyone
+      # has copied .env.example. Containers override the URLs below anyway.
+      - path: .env
+        required: false
     environment:
       DATABASE_URL: postgresql+psycopg://postgres:postgres@db:5432/blood_donation
       REDIS_URL: redis://redis:6379/0
