@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>پروفایل داوطلب | هم‌خون</title>
+  <meta name="description" content="گروه خونی، آخرین اهدا و رضایت‌های خود را در هم‌خون مدیریت کنید." />
+  <meta name="theme-color" content="#f7f4ec" />
+  <link rel="icon" href="../assets/icons/favicon.svg" type="image/svg+xml" />
+  <link rel="preload" href="../assets/fonts/Vazirmatn-Variable.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="stylesheet" href="../css/base.css" />
+  <link rel="stylesheet" href="../css/components.css" />
+  <link rel="stylesheet" href="../css/app.css" />
+  <script>document.documentElement.classList.add("js");</script>
+  <script type="module" src="../js/pages/donor-profile.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">پرش به محتوای اصلی</a>
+
+  <header class="app-head">
+    <div class="app-head__inner">
+      <a class="brand" href="../index.html" aria-label="هم‌خون، صفحه اصلی">
+        <svg class="brand__mark" viewBox="0 0 64 64" aria-hidden="true">
+          <rect width="64" height="64" rx="20" fill="none"/>
+          <path d="M32 12c0 0-13 11.2-13 20.2a13 13 0 0 0 26 0C45 23.2 32 12 32 12Z" fill="none" stroke="currentColor" stroke-width="2.6"/>
+          <path d="M32 40c-3.9-3-6-5.3-6-7.7a3.6 3.6 0 0 1 6-2.5 3.6 3.6 0 0 1 6 2.5c0 2.4-2.1 4.7-6 7.7Z" fill="#D9584C"/>
+        </svg>
+        <span>
+          <span class="brand__name">هم‌خون</span>
+          <span class="brand__sub">پنل داوطلب</span>
+        </span>
+      </a>
+
+      <nav class="app-nav" aria-label="منوی پنل">
+        <a href="donor-dashboard.html">
+          <svg class="icon" aria-hidden="true"><use href="../assets/icons/sprite.svg#i-home"></use></svg>
+          <span>داشبورد</span>
+        </a>
+        <a class="is-active" href="donor-profile.html">
+          <svg class="icon" aria-hidden="true"><use href="../assets/icons/sprite.svg#i-user"></use></svg>
+          <span>پروفایل من</span>
+        </a>
+        <a href="donor-dashboard.html#notifications">
+          <svg class="icon" aria-hidden="true"><use href="../assets/icons/sprite.svg#i-bell"></use></svg>
+          <span>فراخوان‌ها</span>
+        </a>
+      </nav>
+
+      <div class="app-head__actions">
+        <a class="bell-btn" href="donor-dashboard.html#notifications" aria-label="فراخوان‌ها">
+          <svg class="icon" aria-hidden="true"><use href="../assets/icons/sprite.svg#i-bell"></use></svg>
+        </a>
+        <span class="user-chip">
+          <span class="avatar avatar--sm avatar--ink" data-user-avatar>س</span>
+          <span class="user-chip__text">
+            <span class="user-chip__name" data-user-name>سارا محمدی</span>
+            <span class="user-chip__role" data-user-role>داوطلب اهدای خون</span>
+          </span>
+        </span>
+        <button class="icon-btn logout-btn" type="button" data-logout aria-label="خروج از حساب">
+          <svg class="icon" aria-hidden="true"><use href="../assets/icons/sprite.svg#i-logout"></use></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="app-main" id="main">
+    <div class="container">
+      <div class="page-head">
+        <div class="page-head__text">
+          <a class="back-link" href="donor-dashboard.html">
+            <svg class="icon" aria-hidden="true"><use href="../assets/icons/sprite.svg#i-arrow-right"></use></svg>
+            بازگشت به داشبورد
+          </a>
+          <h1>پروفایل من</h1>
+          <p>دقت اطلاعات خونی به فراخوان‌های دقیق‌تر کمک می‌کند. تغییرات پس از ثبت، در پنل شما اعمال می‌شود.</p>
+        </div>
+        <div class="page-head__actions">
+          <span class="demo-pill"><svg class="icon" aria-hidden="true"><use href="../assets/icons/sprite.svg#i-spark"></use></svg> داده‌های نمایشی</span>
+        </div>
+      </div>
+
+      <div class="profile-grid">
+        <aside class="card profile-summary">
+          <div class="profile-summary__head">
+            <span class="avatar avatar--ink" data-user-avatar>س</span>
+            <span>
+              <span class="profile-summary__name" data-user-name>سارا محمدی</span>
+              <span class="profile-summary__phone num" data-user-phone>۰۹۱۲ ۱۲۳ ۴۵۶۷</span>
+            </span>
+            <span class="verified-note" data-verified-note>
+              <svg class="icon" aria-hidden="true"><use href="../assets/icons/sprite.svg#i-shield"></use></svg>
+              <span data-verified-text>گروه خونی تأییدشده</span>
+            </span>
+          </div>
+
+          <div class="completion">
+            <div class="ring" style="--p: 100" role="img" aria-label="میزان تکمیل پروفایل" data-profile-ring>
+              <span class="ring__value" data-profile-percent>۱۰۰٪</span>
+            </div>
+            <div>
+              <b>پروفایل شما کامل است</b>
+              <span data-completion-text>همه‌ی اطلاعات لازم برای دریافت فراخوان ثبت شده است.</span>
+            </div>
+          </div>
+
+          <div class="summary-facts">
+            <div class="summary-fact"><span>گروه خونی</span><b data-summary-blood>O+</b></div>
+            <div class="summary-fact"><span>عامل Rh</span><b data-summary-rh>مثبت</b></div>
+            <div class="summary-fact"><span>آخرین اهدا</span><b data-summary-last>۱۸ مهر ۱۴۰۵</b></div>
+            <div class="summary-fact"><span>پیامک اطلاع‌رسانی</span><b data-summary-sms>فعال</b></div>
+            <div class="summary-fact"><span>رضایت موقعیت مکانی</span><b data-summary-location>فعال</b></div>
+          </div>
+
+          <div class="profile-summary__foot">
+            <p class="privacy-note">
+              <svg class="icon" aria-hidden="true"><use href="../assets/icons/sprite.svg#i-info"></use></svg>
+              تأیید نهایی گروه خونی و مناسب‌بودن اهدا در مرکز انجام می‌شود. این اطلاعات جایگزین ارزیابی پزشک نیست.
+            </p>
+          </div>
+        </aside>
+
+        <form class="card profile-form" id="profile-form" novalidate>
+          <section class="form-section">
+            <div class="form-section__head">
+              <span class="form-section__num">۱</span>
+              <div>
+                <h2>اطلاعات خونی</h2>
+                <p>گروه خونی ثبت‌شده در پروفایل شما.</p>
+              </div>
+            </div>
+
+            <div class="field">
+              <span class="label">گروه خونی</span>
+              <div class="blood-group-grid" role="radiogroup" aria-label="گروه خونی">
+                <label class="choice choice--blood"><input type="radio" name="blood_group" value="A" /><span class="choice__title">A</span></label>
+                <label class="choice choice--blood"><input type="radio" name="blood_group" value="B" /><span class="choice__title">B</span></label>
+                <label class="choice choice--blood"><input type="radio" name="blood_group" value="AB" /><span class="choice__title">AB</span></label>
+                <label class="choice choice--blood"><input type="radio" name="blood_group" value="O" /><span class="choice__title">O</span></label>
+              </div>
+              <p class="field-error"></p>
+            </div>
+
+            <div class="field">
+              <span class="label">عامل Rh</span>
+              <div class="rh-row" role="radiogroup" aria-label="عامل Rh">
+                <label class="choice" style="min-height: 0; flex-direction: row; align-items: center; gap: 0.5rem; padding: 0.6rem 1rem">
+                  <input type="radio" name="rh_factor" value="positive" />
+                  <span class="choice__title">مثبت (+)</span>
+                </label>
+                <label class="choice" style="min-height: 0; flex-direction: row; align-items: center; gap: 0.5rem; padding: 0.6rem 1rem">
+                  <input type="radio" name="rh_factor" value="negative" />
+                  <span class="choice__title">منفی (−)</span>
+                </label>
+                <span>در صورت اطمینان نداشتن، گزینه‌ی ثبت‌شده را تغییر ندهید.</span>
+              </div>
+              <p class="field-error"></p>
+            </div>
+
+            <div class="field">
+              <label class="label" for="last-donation">تاریخ آخرین اهدا <span class="label__optional">اختیاری</span></label>
+              <input class="input input--ltr" id="last-donation" name="last_donation_date" type="date" max="" />
+              <p class="hint">اگر تا امروز اهدا نکرده‌اید، خالی بگذارید. تاریخ به میلادی ثبت می‌شود.</p>
+              <p class="field-error"></p>
+            </div>
+          </section>
+
+          <section class="form-section">
+            <div class="form-section__head">
+              <span class="form-section__num">۲</span>
+              <div>
+                <h2>رضایت‌ها و اطلاع‌رسانی</h2>
+                <p>کنترل کنید چه اطلاعاتی و از چه راهی دریافت شود.</p>
+              </div>
+            </div>
+
+            <div class="switch-row">
+              <div class="switch-row__text">
+                <span class="switch-row__title">دریافت پیامک فراخوان</span>
+                <span class="switch-row__desc">فراخوان‌های فوری و یادآوری نوبت به شماره شما پیامک می‌شود.</span>
+              </div>
+              <button class="switch" type="button" role="switch" aria-checked="true" aria-label="دریافت پیامک فراخوان" data-consent="sms_consent"></button>
+            </div>
+
+            <div class="switch-row">
+              <div class="switch-row__text">
+                <span class="switch-row__title">اجازه‌ی استفاده از موقعیت مکانی</span>
+                <span class="switch-row__desc">فقط برای پیشنهاد نزدیک‌ترین مرکز؛ هر زمان قابل لغو است.</span>
+              </div>
+              <button class="switch" type="button" role="switch" aria-checked="true" aria-label="اجازه استفاده از موقعیت مکانی" data-consent="location_consent"></button>
+            </div>
+
+            <p class="privacy-note" style="margin-block-start: 1rem">
+              <svg class="icon" aria-hidden="true"><use href="../assets/icons/sprite.svg#i-lock"></use></svg>
+              با خاموش کردن رضایت موقعیت، داده‌ی مکان شما از سامانه حذف می‌شود و دیگر برای مسیریابی استفاده نخواهد شد.
+            </p>
+          </section>
+
+          <section class="form-section">
+            <div class="form-section__head">
+              <span class="form-section__num">۳</span>
+              <div>
+                <h2>شماره تماس</h2>
+                <p>شماره‌ای که با آن وارد شده‌اید.</p>
+              </div>
+            </div>
+            <div class="readonly-value">
+              <span class="num" data-user-phone>۰۹۱۲ ۱۲۳ ۴۵۶۷</span>
+              <span class="tag tag--success">تأییدشده</span>
+            </div>
+            <p class="hint">برای تغییر شماره موبایل، با پشتیبانی هم‌خون تماس بگیرید.</p>
+          </section>
+
+          <div class="form-save-bar">
+            <p>بررسی نهایی مناسب‌بودن اهدا همیشه با پزشک مرکز است.</p>
+            <button class="btn btn--primary" type="submit">
+              <span class="btn__label">ذخیره تغییرات</span>
+              <svg class="icon" aria-hidden="true"><use href="../assets/icons/sprite.svg#i-check"></use></svg>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <nav class="mobile-tabbar" aria-label="منوی پایین">
+    <a href="donor-dashboard.html">
+      <svg class="icon" aria-hidden="true"><use href="../assets/icons/sprite.svg#i-home"></use></svg>
+      داشبورد
+    </a>
+    <a href="donor-dashboard.html#notifications">
+      <svg class="icon" aria-hidden="true"><use href="../assets/icons/sprite.svg#i-bell"></use></svg>
+      فراخوان‌ها
+    </a>
+    <a class="is-active" href="donor-profile.html">
+      <svg class="icon" aria-hidden="true"><use href="../assets/icons/sprite.svg#i-user"></use></svg>
+      پروفایل
+    </a>
+    <a href="login.html" data-logout>
+      <svg class="icon" aria-hidden="true"><use href="../assets/icons/sprite.svg#i-logout"></use></svg>
+      خروج
+    </a>
+  </nav>
+</body>
+</html>

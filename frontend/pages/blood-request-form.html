@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ثبت درخواست خون | هم‌خون</title>
+  <meta name="description" content="ثبت درخواست خون برای مرکز اهدای خون؛ انتخاب فرآورده، گروه خونی، تعداد واحد، فوریت و مهلت پاسخ." />
+  <meta name="theme-color" content="#f7f4ec" />
+  <link rel="icon" href="../assets/icons/favicon.svg" type="image/svg+xml" />
+  <link rel="preload" href="../assets/fonts/Vazirmatn-Variable.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="stylesheet" href="../css/base.css" />
+  <link rel="stylesheet" href="../css/components.css" />
+  <link rel="stylesheet" href="../css/app.css" />
+  <script>document.documentElement.classList.add("js");</script>
+  <script type="module" src="../js/pages/blood-request-form.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">پرش به محتوای اصلی</a>
+
+  <header class="app-head">
+    <div class="app-head__inner">
+      <a class="brand" href="../index.html" aria-label="هم‌خون، صفحه اصلی">
+        <svg class="brand__mark" viewBox="0 0 64 64" aria-hidden="true">
+          <rect width="64" height="64" rx="20" fill="none"/>
+          <path d="M32 12c0 0-13 11.2-13 20.2a13 13 0 0 0 26 0C45 23.2 32 12 32 12Z" fill="none" stroke="currentColor" stroke-width="2.6"/>
+          <path d="M32 40c-3.9-3-6-5.3-6-7.7a3.6 3.6 0 0 1 6-2.5 3.6 3.6 0 0 1 6 2.5c0 2.4-2.1 4.7-6 7.7Z" fill="#D9584C"/>
+        </svg>
+        <span>
+          <span class="brand__name">هم‌خون</span>
+          <span class="brand__sub">پنل مرکز اهدای خون</span>
+        </span>
+      </a>
+
+      <nav class="app-nav" aria-label="منوی پنل">
+        <a href="center-dashboard.html">
+          <svg class="icon" aria-hidden="true"><use href="../assets/icons/sprite.svg#i-home"></use></svg>
+          <span>داشبورد</span>
+        </a>
+        <a href="center-dashboard.html#requests">
+          <svg class="icon" aria-hidden="true"><use href="../assets/icons/sprite.svg#i-drop"></use></svg>
+          <span>درخواست‌ها</span>
+        </a>
+        <a class="is-active" href="blood-request-form.html">
+          <svg class="icon" aria-hidden="true"><use href="../assets/icons/sprite.svg#i-plus"></use></svg>
+          <span>ثبت درخواست</span>
+        </a>
+      </nav>
+
+      <div class="app-head__actions">
+        <a class="bell-btn" href="center-dashboard.html#requests" aria-label="بازگشت به درخواست‌ها">
+          <svg class="icon" aria-hidden="true"><use href="../assets/icons/sprite.svg#i-bell"></use></svg>
+        </a>
+        <span class="user-chip">
+          <span class="avatar avatar--sm avatar--ink" data-user-avatar>ا</span>
+          <span class="user-chip__text">
+            <span class="user-chip__name" data-user-name>امیر رضایی</span>
+            <span class="user-chip__role" data-user-role>کارشناس مرکز اهدای خون</span>
+          </span>
+        </span>
+        <button class="icon-btn logout-btn" type="button" data-logout aria-label="خروج از حساب">
+          <svg class="icon" aria-hidden="true"><use href="../assets/icons/sprite.svg#i-logout"></use></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="app-main" id="main">
+    <div class="container">
+      <div class="page-head">
+        <div class="page-head__text">
+          <a class="back-link" href="center-dashboard.html">
+            <svg class="icon" aria-hidden="true"><use href="../assets/icons/sprite.svg#i-arrow-right"></use></svg>
+            بازگشت به داشبورد مرکز
+          </a>
+          <h1>درخواست تازه، دقیق و شفاف</h1>
+          <p>هرچه اطلاعات فرآورده و مهلت دقیق‌تر باشد، داوطلبان هم‌خوان سریع‌تر پیدا می‌شوند. ثبت درخواست به معنی تأیید نهایی سلامت داوطلبان نیست؛ این ارزیابی در مرکز انجام می‌شود.</p>
+        </div>
+        <div class="page-head__actions">
+          <span class="demo-pill"><svg class="icon" aria-hidden="true"><use href="../assets/icons/sprite.svg#i-spark"></use></svg> نسخه نمایشی</span>
+        </div>
+      </div>
+
+      <div class="request-layout">
+        <form class="card request-form-card" id="request-form" novalidate>
+          <section class="form-section">
+            <div class="form-section__head">
+              <span class="form-section__num">۱</span>
+              <div>
+                <h2>فرآورده‌ی مورد نیاز</h2>
+                <p>نوع فرآورده را انتخاب کنید؛ انتخاب پیش‌فرض نداریم تا ثبت دقیق انجام شود.</p>
+              </div>
+            </div>
+
+            <div class="field" data-field="component_type">
+              <span class="label" id="component-label">نوع فرآورده</span>
+              <div class="choice-grid" role="radiogroup" aria-labelledby="component-label" data-component-grid>
+                <label class="choice">
+                  <input type="radio" name="component_type" value="red_cells" />
+                  <svg class="icon" aria-hidden="true"><use href="../assets/icons/sprite.svg#i-drop"></use></svg>
+                  <span class="choice__title">گلبول قرمز</span>
+                  <span class="choice__meta">جراحی و کم‌خونی شدید</span>
+                </label>
+                <label class="choice">
+                  <input type="radio" name="component_type" value="platelets" />
+                  <svg class="icon" aria-hidden="true"><use href="../assets/icons/sprite.svg#i-activity"></use></svg>
+                  <span class="choice__title">پلاکت</span>
+                  <span class="choice__meta">افت پلاکت و شیمی‌درمانی</span>
+                </label>
+                <label class="choice">
+                  <input type="radio" name="component_type" value="plasma" />
+                  <svg class="icon" aria-hidden="true"><use href="../assets/icons/sprite.svg#i-heart"></use></svg>
+                  <span class="choice__title">پلاسما</span>
+                  <span class="choice__meta">سوختگی و انعقاد</span>
+                </label>
+                <label class="choice">
+                  <input type="radio" name="component_type" value="whole_blood" />
+                  <svg class="icon" aria-hidden="true"><use href="../assets/icons/sprite.svg#i-hospital"></use></svg>
+                  <span class="choice__title">خون کامل</span>
+                  <span class="choice__meta">بر اساس نظر مرکز درمانی</span>
+                </label>
+              </div>
+              <p class="field-error" data-error-for="component_type"></p>
+            </div>
+          </section>
+
+          <section class="form-section">
+            <div class="form-section__head">
+              <span class="form-section__num">۲</span>
+              <div>
+                <h2>گروه خونی و تعداد</h2>
+                <p>گروه خونی بیمار و تعداد واحد مورد نیاز را مشخص کنید.</p>
+              </div>
+            </div>
+
+            <div class="field" data-field="blood_group">
+              <span class="label" id="blood-group-label">گروه خونی</span>
+              <div class="blood-group-grid" role="radiogroup" aria-labelledby="blood-group-label" data-blood-grid>
+                <label class="choice choice--blood"><input type="radio" name="blood_group" value="A" /><span class="choice__title">A</span></label>
+                <label class="choice choice--blood"><input type="radio" name="blood_group" value="B" /><span class="choice__title">B</span></label>
+                <label class="choice choice--blood"><input type="radio" name="blood_group" value="AB" /><span class="choice__title">AB</span></label>
+                <label class="choice choice--blood"><input type="radio" name="blood_group" value="O" /><span class="choice__title">O</span></label>
+              </div>
+              <p class="field-error" data-error-for="blood_group"></p>
+            </div>
+
+            <div class="field" data-field="rh_factor">
+              <span class="label">عامل Rh</span>
+              <div class="rh-row">
+                <div class="segmented segmented--radio" role="radiogroup" aria-label="عامل Rh" data-rh-group style="max-width: 22rem">
+                  <label class="seg-option"><input type="radio" name="rh_factor" value="positive" /><span>مثبت (+)</span></label>
+                  <label class="seg-option"><input type="radio" name="rh_factor" value="negative" /><span>منفی (−)</span></label>
+                </div>
+              </div>
+              <p class="field-error" data-error-for="rh_factor"></p>
+            </div>
+
+            <div class="field" data-field="units_needed">
+              <span class="label" id="units-label">تعداد واحد مورد نیاز</span>
+              <div class="units-field">
+                <div class="stepper" role="group" aria-labelledby="units-label">
+                  <button class="stepper__btn" type="button" data-step="-1" aria-label="کاهش تعداد واحد">−</button>
+                  <input class="stepper__input" id="units-needed" name="units_needed" type="number" min="1" max="10" step="1" value="1" inputmode="numeric" aria-labelledby="units-label" />
+                  <button class="stepper__btn" type="button" data-step="1" aria-label="افزایش تعداد واحد">
+                    <svg class="icon" aria-hidden="true"><use href="../assets/icons/sprite.svg#i-plus"></use></svg>
+                  </button>
+                </div>
+                <p class="hint">بین ۱ تا ۱۰ واحد؛ در صورت نیاز بیشتر، درخواست را در چند مرحله ثبت کنید.</p>
+              </div>
+              <p class="field-error" data-error-for="units_needed"></p>
+            </div>
+          </section>
+
+          <section class="form-section">
+            <div class="form-section__head">
+              <span class="form-section__num">۳</span>
+              <div>
+                <h2>فوریت و مهلت پاسخ</h2>
+                <p>سطح فوریت، اولویت پیام‌رسانی به داوطلبان را تعیین می‌کند.</p>
+              </div>
+            </div>
+
+            <div class="field" data-field="urgency">
+              <span class="label" id="urgency-label">سطح فوریت</span>
+              <div class="segmented segmented--radio" role="radiogroup" aria-labelledby="urgency-label" data-urgency-group>
+                <label class="seg-option"><input type="radio" name="urgency" value="routine" checked /><span>معمولی <small>طی روزهای آینده</small></span></label>
+                <label class="seg-option"><input type="radio" name="urgency" value="urgent" /><span>فوری <small>امروز</small></span></label>
+                <label class="seg-option"><input type="radio" name="urgency" value="critical" /><span>بحرانی <small>حداکثر چند ساعت</small></span></label>
+              </div>
+              <p class="field-error" data-error-for="urgency"></p>
+            </div>
+
+            <div class="field" data-field="expires_at">
+              <label class="label" for="expires-at">مهلت پاسخ داوطلبان</label>
+              <input class="input input--ltr" id="expires-at" name="expires_at" type="datetime-local" required />
+              <div class="expiry-row" aria-label="مهلت‌های پیشنهادی">
+                <button class="chip-time" type="button" data-expiry-minutes="120">۲ ساعت</button>
+                <button class="chip-time" type="button" data-expiry-minutes="360">۶ ساعت</button>
+                <button class="chip-time" type="button" data-expiry-minutes="1440">۱ روز</button>
+                <button class="chip-time" type="button" data-expiry-minutes="2880">۲ روز</button>
+              </div>
+              <p class="hint">مهلت باید در آینده باشد؛ برای درخواست بحرانی، بازه‌ی کوتاه‌تر را انتخاب کنید.</p>
+              <p class="field-error" data-error-for="expires_at"></p>
+            </div>
+          </section>
+
+          <section class="form-section">
+            <div class="form-section__head">
+              <span class="form-section__num">۴</span>
+              <div>
+                <h2>یادداشت برای داوطلبان</h2>
+                <p>این متن در پیام فراخوان دیده می‌شود؛ از اطلاعات هویتی بیمار خودداری کنید.</p>
+              </div>
+            </div>
+
+            <div class="field" data-field="notes">
+              <label class="label" for="request-notes">یادداشت <span class="label__optional">اختیاری</span></label>
+              <textarea class="textarea" id="request-notes" name="notes" maxlength="500" rows="4" placeholder="مثلاً: بیمار تصادفی در اورژانس؛ هماهنگی با سوپروایزر انجام شده است."></textarea>
+              <div class="form-hint-row">
+                <p class="hint">از ذکر نام، شماره یا جزئیات شناسایی‌کننده‌ی بیمار پرهیز کنید.</p>
+                <span class="notes-counter" data-notes-count>۰ از ۵۰۰</span>
+              </div>
+              <p class="field-error" data-error-for="notes"></p>
+            </div>
+          </section>
+
+          <div class="form-save-bar">
+            <p>
+              ثبت پیش‌نویس، هیچ پیامی به داوطلبان نمی‌فرستد. فعال‌سازی نیز پیش از فراخوان، اعلانی ارسال نمی‌کند.
+            </p>
+            <div class="form-save-bar__actions">
+              <button class="btn btn--soft" type="submit" name="mode" value="draft">
+                <svg class="icon" aria-hidden="true"><use href="../assets/icons/sprite.svg#i-edit"></use></svg>
+                <span class="btn__label">ذخیره پیش‌نویس</span>
+              </button>
+              <button class="btn btn--primary" type="submit" name="mode" value="activate">
+                <svg class="icon" aria-hidden="true"><use href="../assets/icons/sprite.svg#i-send"></use></svg>
+                <span class="btn__label">ثبت و فعال‌سازی</span>
+              </button>
+            </div>
+          </div>
+        </form>
+
+        <aside class="preview-card" aria-label="پیش‌نمایش درخواست">
+          <div class="preview-card__top">
+            <span>پیش‌نمایش درخواست</span>
+            <span class="tag tag--live"><span class="tag__dot"></span> زنده</span>
+          </div>
+
+          <div class="preview-ticket">
+            <div class="preview-blood">
+              <span class="preview-blood__value" data-preview-blood>—</span>
+              <span class="preview-blood__type" data-preview-type>گروه خونی</span>
+            </div>
+            <h3 data-preview-headline>درخواست تازه</h3>
+            <p data-preview-desc>فرآورده و گروه خونی را انتخاب کنید تا پیش‌نمایش کامل شود.</p>
+
+            <div class="preview-rows">
+              <div class="preview-row"><span>فرآورده</span><b data-preview-component>انتخاب نشده</b></div>
+              <div class="preview-row"><span>تعداد</span><b data-preview-units>۱ واحد</b></div>
+              <div class="preview-row"><span>فوریت</span><b data-preview-urgency>معمولی</b></div>
+              <div class="preview-row"><span>مهلت</span><b data-preview-expiry>۶ ساعت</b></div>
+              <div class="preview-row"><span>مرکز</span><b data-preview-center data-center-name>مرکز اهدای خون</b></div>
+            </div>
+          </div>
+
+          <p class="preview-note">
+            <svg class="icon" aria-hidden="true"><use href="../assets/icons/sprite.svg#i-shield"></use></svg>
+            این پیش‌نمایش فقط برای بازبینی است. ارزیابی نهایی سلامت داوطلبان و تأیید فرآورده، توسط پزشک مرکز انجام می‌شود.
+          </p>
+
+          <div class="preview-card__actions">
+            <a class="btn btn--block" href="center-dashboard.html">
+              <svg class="icon" aria-hidden="true"><use href="../assets/icons/sprite.svg#i-arrow-right"></use></svg>
+              <span class="btn__label">بازگشت به داشبورد</span>
+            </a>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </main>
+
+  <nav class="mobile-tabbar" aria-label="منوی پایین">
+    <a href="center-dashboard.html">
+      <svg class="icon" aria-hidden="true"><use href="../assets/icons/sprite.svg#i-home"></use></svg>
+      داشبورد
+    </a>
+    <a href="center-dashboard.html#requests">
+      <svg class="icon" aria-hidden="true"><use href="../assets/icons/sprite.svg#i-drop"></use></svg>
+      درخواست‌ها
+    </a>
+    <a class="is-active" href="blood-request-form.html">
+      <svg class="icon" aria-hidden="true"><use href="../assets/icons/sprite.svg#i-plus"></use></svg>
+      درخواست جدید
+    </a>
+    <a href="login.html" data-logout>
+      <svg class="icon" aria-hidden="true"><use href="../assets/icons/sprite.svg#i-logout"></use></svg>
+      خروج
+    </a>
+  </nav>
+</body>
+</html>

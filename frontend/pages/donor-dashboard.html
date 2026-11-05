@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>داشبورد داوطلب | هم‌خون</title>
+  <meta name="description" content="فراخوان‌های نزدیک، وضعیت آمادگی و پروفایل داوطلب در هم‌خون." />
+  <meta name="theme-color" content="#f7f4ec" />
+  <link rel="icon" href="../assets/icons/favicon.svg" type="image/svg+xml" />
+  <link rel="preload" href="../assets/fonts/Vazirmatn-Variable.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="stylesheet" href="../css/base.css" />
+  <link rel="stylesheet" href="../css/components.css" />
+  <link rel="stylesheet" href="../css/app.css" />
+  <script>document.documentElement.classList.add("js");</script>
+  <script type="module" src="../js/pages/donor-dashboard.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">پرش به محتوای اصلی</a>
+
+  <header class="app-head">
+    <div class="app-head__inner">
+      <a class="brand" href="../index.html" aria-label="هم‌خون، صفحه اصلی">
+        <svg class="brand__mark" viewBox="0 0 64 64" aria-hidden="true">
+          <rect width="64" height="64" rx="20" fill="none"/>
+          <path d="M32 12c0 0-13 11.2-13 20.2a13 13 0 0 0 26 0C45 23.2 32 12 32 12Z" fill="none" stroke="currentColor" stroke-width="2.6"/>
+          <path d="M32 40c-3.9-3-6-5.3-6-7.7a3.6 3.6 0 0 1 6-2.5 3.6 3.6 0 0 1 6 2.5c0 2.4-2.1 4.7-6 7.7Z" fill="#D9584C"/>
+        </svg>
+        <span>
+          <span class="brand__name">هم‌خون</span>
+          <span class="brand__sub">پنل داوطلب</span>
+        </span>
+      </a>
+
+      <nav class="app-nav" aria-label="منوی پنل">
+        <a class="is-active" href="donor-dashboard.html">
+          <svg class="icon" aria-hidden="true"><use href="../assets/icons/sprite.svg#i-home"></use></svg>
+          <span>داشبورد</span>
+        </a>
+        <a href="donor-profile.html">
+          <svg class="icon" aria-hidden="true"><use href="../assets/icons/sprite.svg#i-user"></use></svg>
+          <span>پروفایل من</span>
+        </a>
+        <a href="#notifications">
+          <svg class="icon" aria-hidden="true"><use href="../assets/icons/sprite.svg#i-bell"></use></svg>
+          <span>فراخوان‌ها</span>
+        </a>
+      </nav>
+
+      <div class="app-head__actions">
+        <a class="bell-btn" href="#notifications" aria-label="فراخوان‌های در انتظار پاسخ">
+          <svg class="icon" aria-hidden="true"><use href="../assets/icons/sprite.svg#i-bell"></use></svg>
+          <span class="bell-btn__dot" data-bell-dot hidden></span>
+        </a>
+        <span class="user-chip">
+          <span class="avatar avatar--sm avatar--ink" data-user-avatar>س</span>
+          <span class="user-chip__text">
+            <span class="user-chip__name" data-user-name>سارا محمدی</span>
+            <span class="user-chip__role" data-user-role>داوطلب اهدای خون</span>
+          </span>
+        </span>
+        <button class="icon-btn logout-btn" type="button" data-logout aria-label="خروج از حساب">
+          <svg class="icon" aria-hidden="true"><use href="../assets/icons/sprite.svg#i-logout"></use></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="app-main" id="main">
+    <div class="container">
+      <div class="page-head">
+        <div class="page-head__text">
+          <span class="eyebrow">پنل داوطلب <span class="demo-pill"><svg class="icon" aria-hidden="true"><use href="../assets/icons/sprite.svg#i-spark"></use></svg> نسخه نمایشی</span></span>
+          <h1>سلام <span data-user-name>سارا</span>، آماده‌ی اهدا هستی؟</h1>
+          <p>فراخوان‌های هم‌خوان با گروه خونی و محدوده‌ی شما اینجا نمایش داده می‌شود. بررسی نهایی سلامت همیشه با پزشک مرکز است.</p>
+        </div>
+        <div class="page-head__actions">
+          <a class="btn btn--ghost" href="donor-profile.html">
+            <svg class="icon" aria-hidden="true"><use href="../assets/icons/sprite.svg#i-user"></use></svg>
+            <span class="btn__label">پروفایل من</span>
+          </a>
+          <a class="btn btn--primary" href="#notifications">
+            <svg class="icon" aria-hidden="true"><use href="../assets/icons/sprite.svg#i-bell"></use></svg>
+            <span class="btn__label">دیدن فراخوان‌ها</span>
+          </a>
+        </div>
+      </div>
+
+      <div class="dash-grid">
+        <div class="dash-col">
+          <section class="welcome-card" aria-labelledby="welcome-title">
+            <div class="welcome-card__copy">
+              <span class="eyebrow" data-blood-eyebrow>گروه خونی O+</span>
+              <h1 id="welcome-title">یک اهدا، سه زندگیِ تازه</h1>
+              <p>هر بار که آمادگی‌تان را اعلام می‌کنید، فراخوان‌های نزدیک و مرتبط با گروه خونی شما در اولویت قرار می‌گیرد. وقت و فاصله‌تان برای ما مهم است.</p>
+              <div class="welcome-card__stats">
+                <div class="welcome-stat">
+                  <span class="welcome-stat__icon"><svg class="icon" aria-hidden="true"><use href="../assets/icons/sprite.svg#i-drop"></use></svg></span>
+                  <span>
+                    <b data-blood-group>O+</b>
+                    <span>گروه خونی ثبت‌شده</span>
+                  </span>
+                </div>
+                <div class="welcome-stat">
+                  <span class="welcome-stat__icon"><svg class="icon" aria-hidden="true"><use href="../assets/icons/sprite.svg#i-calendar"></use></svg></span>
+                  <span>
+                    <b data-last-donation>۱۸ مهر ۱۴۰۵</b>
+                    <span data-last-donation-ago>آخرین اهدای ثبت‌شده</span>
+                  </span>
+                </div>
+                <div class="welcome-stat">
+                  <span class="welcome-stat__icon"><svg class="icon" aria-hidden="true"><use href="../assets/icons/sprite.svg#i-shield"></use></svg></span>
+                  <span>
+                    <b>داده تأییدشده</b>
+                    <span>وضعیت پروفایل</span>
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div class="welcome-card__ring">
+              <div class="ring" style="--p: 100" role="img" aria-label="پروفایل کامل" data-profile-ring>
+                <span class="ring__value" data-profile-percent>۱۰۰٪</span>
+              </div>
+              <div>
+                <b>پروفایل کامل است</b>
+                <span>گروه خونی، آخرین اهدا و رضایت پیامکی ثبت شده‌اند.</span>
+              </div>
+            </div>
+          </section>
+
+          <section class="card availability is-available" aria-labelledby="availability-title" data-availability-card>
+            <div class="availability__top">
+              <div class="availability__state">
+                <span class="availability__dot" aria-hidden="true"></span>
+                <span>
+                  <span class="availability__label" id="availability-title" data-availability-label>آماده‌ی اهدا هستم</span>
+                  <span class="availability__desc" data-availability-desc>فراخوان‌های هم‌خوان با گروه خونی شما برایتان ارسال می‌شود.</span>
+                </span>
+              </div>
+              <button class="switch" type="button" role="switch" aria-checked="true" aria-label="تغییر وضعیت آمادگی اهدا" data-availability-switch></button>
+            </div>
+
+            <div class="availability__times">
+              <span class="time-pill">
+                <svg class="icon" aria-hidden="true"><use href="../assets/icons/sprite.svg#i-clock"></use></svg>
+                <span data-availability-times>از ۱۴:۳۰ تا ۱۸:۵۰</span>
+              </span>
+              <span class="time-pill">
+                <svg class="icon" aria-hidden="true"><use href="../assets/icons/sprite.svg#i-pin"></use></svg>
+                شیراز · محدوده ۱۰ کیلومتری
+              </span>
+              <button class="btn btn--soft btn--sm" type="button" data-edit-times aria-expanded="false" aria-controls="time-editor">
+                <svg class="icon" aria-hidden="true"><use href="../assets/icons/sprite.svg#i-edit"></use></svg>
+                <span class="btn__label">ویرایش بازه</span>
+              </button>
+            </div>
+
+            <form class="time-editor" id="time-editor" data-time-editor novalidate>
+              <div class="field">
+                <label class="label" for="available-from">از ساعت</label>
+                <input class="input" id="available-from" name="available_from" type="time" required />
+              </div>
+              <div class="field">
+                <label class="label" for="available-until">تا ساعت</label>
+                <input class="input" id="available-until" name="available_until" type="time" required />
+              </div>
+              <button class="btn btn--primary btn--sm" type="submit">
+                <span class="btn__label">ذخیره بازه</span>
+              </button>
+              <button class="btn btn--ghost btn--sm" type="button" data-cancel-times>انصراف</button>
+              <p class="field-error" data-time-error></p>
+            </form>
+          </section>
+
+          <section id="notifications" aria-labelledby="notif-title">
+            <div class="section-label">
+              <h2 id="notif-title">فراخوان‌های نزدیک شما</h2>
+              <span class="section-label__meta" data-notif-meta>در حال دریافت…</span>
+            </div>
+            <div class="notification-list" data-notification-list>
+              <div class="skeleton" style="height: 168px; border-radius: 22px"></div>
+              <div class="skeleton" style="height: 168px; border-radius: 22px"></div>
+            </div>
+            <div class="empty-state" data-notif-empty hidden>
+              <span class="empty-state__art"><svg class="icon" aria-hidden="true"><use href="../assets/icons/sprite.svg#i-bell"></use></svg></span>
+              <h3>فعلاً فراخوانی برای شما نیست</h3>
+              <p>با فعال ماندن وضعیت آمادگی، به‌محض ثبت نیاز هم‌خوان، همین‌جا باخبر می‌شوید.</p>
+            </div>
+          </section>
+        </div>
+
+        <aside class="side-stack">
+          <section class="card tips-card">
+            <h3><svg class="icon" aria-hidden="true"><use href="../assets/icons/sprite.svg#i-heart"></use></svg> قبل از مراجعه</h3>
+            <ul class="tips-list">
+              <li><span class="dot"></span> کارت شناسایی همراه داشته باشید.</li>
+              <li><span class="dot"></span> خواب کافی و یک وعده‌ی سبک را فراموش نکنید.</li>
+              <li><span class="dot"></span> قبل و بعد از اهدا آب کافی بنوشید.</li>
+              <li><span class="dot"></span> اگر دارویی مصرف می‌کنید، با کارشناسان مرکز هماهنگ کنید.</li>
+            </ul>
+            <p class="privacy-note" style="margin-block-start: 0.9rem">
+              <svg class="icon" aria-hidden="true"><use href="../assets/icons/sprite.svg#i-info"></use></svg>
+              این‌ها توصیه‌های عمومی است؛ ارزیابی نهایی و دستورالعمل دقیق را پزشک مرکز اهدا ارائه می‌کند.
+            </p>
+          </section>
+
+          <a class="card side-link-card" href="donor-profile.html">
+            <span class="icon-tile"><svg class="icon" aria-hidden="true"><use href="../assets/icons/sprite.svg#i-user"></use></svg></span>
+            <span class="side-link-card__text">
+              <b>پروفایل من</b>
+              <span>گروه خونی، آخرین اهدا و رضایت‌ها را بررسی کنید.</span>
+            </span>
+            <svg class="icon" aria-hidden="true"><use href="../assets/icons/sprite.svg#i-chevron-left"></use></svg>
+          </a>
+
+          <a class="card side-link-card" href="../index.html#process">
+            <span class="icon-tile"><svg class="icon" aria-hidden="true"><use href="../assets/icons/sprite.svg#i-route"></use></svg></span>
+            <span class="side-link-card__text">
+              <b>مسیر اهدا چطور است؟</b>
+              <span>از اعلام آمادگی تا حضور در مرکز، در چهار قدم.</span>
+            </span>
+            <svg class="icon" aria-hidden="true"><use href="../assets/icons/sprite.svg#i-chevron-left"></use></svg>
+          </a>
+
+          <p class="privacy-note">
+            <svg class="icon" aria-hidden="true"><use href="../assets/icons/sprite.svg#i-lock"></use></svg>
+            موقعیت مکانی شما فقط برای پیشنهاد نزدیک‌ترین مرکز استفاده می‌شود و هر زمان قابل لغو است.
+          </p>
+        </aside>
+      </div>
+    </div>
+  </main>
+
+  <nav class="mobile-tabbar" aria-label="منوی پایین">
+    <a class="is-active" href="donor-dashboard.html">
+      <svg class="icon" aria-hidden="true"><use href="../assets/icons/sprite.svg#i-home"></use></svg>
+      داشبورد
+    </a>
+    <a href="#notifications">
+      <svg class="icon" aria-hidden="true"><use href="../assets/icons/sprite.svg#i-bell"></use></svg>
+      فراخوان‌ها
+    </a>
+    <a href="donor-profile.html">
+      <svg class="icon" aria-hidden="true"><use href="../assets/icons/sprite.svg#i-user"></use></svg>
+      پروفایل
+    </a>
+    <a href="login.html" data-logout>
+      <svg class="icon" aria-hidden="true"><use href="../assets/icons/sprite.svg#i-logout"></use></svg>
+      خروج
+    </a>
+  </nav>
+</body>
+</html>

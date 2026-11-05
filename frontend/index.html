@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>هم‌خون | سامانه هوشمند فراخوان و مسیریابی داوطلبان اهدای خون</title>
+  <meta name="description" content="هم‌خون داوطلبان اهدای خون را بر اساس گروه خونی، فاصله و فوریت نیاز، هوشمندانه به مراکز اهدا می‌رساند." />
+  <meta name="theme-color" content="#14332b" />
+  <link rel="icon" href="assets/icons/favicon.svg" type="image/svg+xml" />
+  <link rel="preload" href="assets/fonts/Vazirmatn-Variable.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/home.css" />
+  <script>document.documentElement.classList.add("js");</script>
+  <script type="module" src="js/pages/home.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">پرش به محتوای اصلی</a>
+
+  <header class="site-head" data-header>
+    <div class="nav-shell">
+      <a class="brand" href="index.html" aria-label="هم‌خون، صفحه اصلی">
+        <svg class="brand__mark" viewBox="0 0 64 64" aria-hidden="true">
+          <rect width="64" height="64" rx="20" fill="none"/>
+          <path d="M32 12c0 0-13 11.2-13 20.2a13 13 0 0 0 26 0C45 23.2 32 12 32 12Z" fill="none" stroke="currentColor" stroke-width="2.6"/>
+          <path d="M32 40c-3.9-3-6-5.3-6-7.7a3.6 3.6 0 0 1 6-2.5 3.6 3.6 0 0 1 6 2.5c0 2.4-2.1 4.7-6 7.7Z" fill="#D9584C"/>
+        </svg>
+        <span>
+          <span class="brand__name">هم‌خون</span>
+          <span class="brand__sub">اهدای هوشمند، زندگی دوباره</span>
+        </span>
+      </a>
+
+      <nav class="nav-links" aria-label="منوی اصلی">
+        <a class="nav-link" href="index.html" aria-current="page">خانه</a>
+        <a class="nav-link" href="#process">چطور کار می‌کند</a>
+        <a class="nav-link" href="#why">چرا هم‌خون</a>
+        <a class="nav-link" href="#stories">قصه‌ها</a>
+        <a class="nav-link" href="#faq">سوال‌ها</a>
+      </nav>
+
+      <div class="nav-actions">
+        <a class="btn btn--ghost" href="pages/login.html">ورود</a>
+        <a class="btn btn--primary" href="pages/login.html?purpose=register">
+          <span class="btn__label">داوطلب می‌شوم</span>
+          <svg class="icon icon-arrow" aria-hidden="true"><use href="assets/icons/sprite.svg#i-arrow-left"></use></svg>
+        </a>
+        <button class="icon-btn nav-toggle" type="button" data-menu-open="#mobile-menu" aria-label="باز کردن منو" aria-controls="mobile-menu">
+          <svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#i-menu"></use></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <dialog class="mobile-menu" id="mobile-menu" aria-label="منوی موبایل">
+    <div class="mobile-menu__panel">
+      <div class="mobile-menu__head">
+        <span class="brand">
+          <svg class="brand__mark" viewBox="0 0 64 64" aria-hidden="true">
+            <rect width="64" height="64" rx="20" fill="none"/>
+            <path d="M32 12c0 0-13 11.2-13 20.2a13 13 0 0 0 26 0C45 23.2 32 12 32 12Z" fill="none" stroke="currentColor" stroke-width="2.6"/>
+            <path d="M32 40c-3.9-3-6-5.3-6-7.7a3.6 3.6 0 0 1 6-2.5 3.6 3.6 0 0 1 6 2.5c0 2.4-2.1 4.7-6 7.7Z" fill="#D9584C"/>
+          </svg>
+          <span class="brand__name">هم‌خون</span>
+        </span>
+        <button class="icon-btn" type="button" data-close-dialog aria-label="بستن منو">
+          <svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#i-x"></use></svg>
+        </button>
+      </div>
+      <nav class="mobile-menu__links" aria-label="منوی موبایل">
+        <a href="index.html">خانه <svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#i-chevron-left"></use></svg></a>
+        <a href="#process">چطور کار می‌کند <svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#i-chevron-left"></use></svg></a>
+        <a href="#why">چرا هم‌خون <svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#i-chevron-left"></use></svg></a>
+        <a href="#stories">قصه‌ها <svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#i-chevron-left"></use></svg></a>
+        <a href="#faq">سوال‌های پرتکرار <svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#i-chevron-left"></use></svg></a>
+      </nav>
+      <div class="mobile-menu__actions">
+        <a class="btn btn--primary btn--block" href="pages/login.html?purpose=register">داوطلب می‌شوم</a>
+        <a class="btn btn--ghost btn--block" href="pages/login.html">ورود به حساب</a>
+      </div>
+    </div>
+  </dialog>
+
+  <main id="main">
+    <section class="hero">
+      <div class="hero__glow" aria-hidden="true"></div>
+      <div class="container hero__grid">
+        <div class="hero__copy">
+          <span class="eyebrow">سامانه هوشمند فراخوان اهدای خون</span>
+          <h1 class="hero__title">
+            <span class="hero__line" style="--d:.05s"><span>خونِ شما</span></span>
+            <span class="hero__line" style="--d:.16s"><span>نفسِ تازه‌ی</span></span>
+            <span class="hero__line" style="--d:.27s"><span>یک <span class="hero__accent">زندگی
+              <svg viewBox="0 0 220 16" aria-hidden="true" preserveAspectRatio="none"><path d="M4 11c38-7 84-8 212-5"/></svg>
+            </span> است</span></span>
+          </h1>
+          <p class="hero__desc">
+            هم‌خون داوطلبان اهدای خون را بر اساس گروه خونی، فاصله و فوریت نیاز، هوشمندانه به نزدیک‌ترین مرکز می‌رساند؛ بدون صف، بدون تماس‌های پراکنده.
+          </p>
+          <div class="hero__actions">
+            <a class="btn btn--primary btn--lg" href="pages/login.html?purpose=register">
+              <span class="btn__label">داوطلب اهدا می‌شوم</span>
+              <svg class="icon icon-arrow" aria-hidden="true"><use href="assets/icons/sprite.svg#i-arrow-left"></use></svg>
+            </a>
+            <a class="btn btn--ghost btn--lg" href="#process">
+              <svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#i-play"></use></svg>
+              <span class="btn__label">مسیر اهدا را ببینید</span>
+            </a>
+          </div>
+          <div class="hero__proof">
+            <div class="avatar-stack" aria-hidden="true">
+              <span class="avatar">م</span>
+              <span class="avatar">ر</span>
+              <span class="avatar">س</span>
+              <span class="avatar avatar--ink">+</span>
+            </div>
+            <span class="hero__proof-text">
+              <strong>بیش از ۱۲٬۳۰۰ داوطلب فعال</strong>
+              در ۳۶ مرکز اهدای خون سراسر کشور
+            </span>
+            <span class="hero__rating">
+              <svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#i-heart-fill"></use></svg>
+              ۴٫۹ از ۵ · رضایت اهداکنندگان
+            </span>
+          </div>
+        </div>
+
+        <div class="hero__art">
+          <div class="hero__frame frame">
+            <img src="assets/images/hero-donation.webp" alt="پرستار در حال همراهی یک داوطلب اهدای خون" width="900" height="1200" fetchpriority="high" />
+            <div class="hero__tint" aria-hidden="true"></div>
+          </div>
+          <div class="hero__ring" aria-hidden="true"></div>
+          <svg class="hero__leaf" viewBox="0 0 120 120" aria-hidden="true">
+            <path d="M22 104C20 62 44 28 96 16c4 48-22 82-74 88Z" fill="none" stroke="currentColor" stroke-width="1.4"/>
+            <path d="M26 100C44 76 62 56 88 34" fill="none" stroke="currentColor" stroke-width="1.2"/>
+          </svg>
+          <span class="hero__note" aria-hidden="true">
+            برای کسی<br>که منتظر است
+            <svg class="heart-line" viewBox="0 0 80 40"><path d="M4 30C22 36 42 14 76 8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-dasharray="3 5"/></svg>
+          </span>
+
+          <div class="float-card float-card--urgent">
+            <span class="float-card__pulse">
+              <svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#i-drop"></use></svg>
+            </span>
+            <span>
+              <span class="float-card__title">نیاز فوری به O+</span>
+              <span class="float-card__meta">مرکز وصال شیراز · تا ۲ ساعت</span>
+            </span>
+          </div>
+
+          <div class="float-card float-card--eta">
+            <span class="float-card__spark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+            <span>
+              <span class="float-card__meta">نزدیک‌ترین مرکز</span>
+              <span class="float-card__value">۸ دقیقه</span>
+            </span>
+          </div>
+
+          <div class="float-card float-card--people">
+            <span class="avatar avatar--sm avatar--coral">ز</span>
+            <span class="float-card__title">۱۲٬۳۰۰ داوطلب</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="container stats-wrap" data-reveal>
+        <div class="stats-band">
+          <div class="stats-band__grid">
+            <div class="stat-item">
+              <span class="stat-item__icon"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#i-heart"></use></svg></span>
+              <span>
+                <span class="stat-item__value"><span dir="ltr" style="display: inline-block"><span data-count="28400">۲۸٬۴۰۰</span>+</span></span>
+                <span class="stat-item__label">اهدای موفق ثبت‌شده</span>
+              </span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-item__icon"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#i-users"></use></svg></span>
+              <span>
+                <span class="stat-item__value"><span data-count="12300">۱۲٬۳۰۰</span></span>
+                <span class="stat-item__label">داوطلب فعال و آماده</span>
+              </span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-item__icon"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#i-hospital"></use></svg></span>
+              <span>
+                <span class="stat-item__value"><span data-count="36">۳۶</span></span>
+                <span class="stat-item__label">مرکز اهدای خون همکار</span>
+              </span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-item__icon"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#i-clock"></use></svg></span>
+              <span>
+                <span class="stat-item__value"><span data-count="9">۹</span> دقیقه</span>
+                <span class="stat-item__label">میانگین زمان مسیریابی</span>
+              </span>
+            </div>
+          </div>
+          <p class="stats-band__note">آمار صفحه نمایشی است و برای ارائه‌ی نمونه آماده شده؛ در نسخه نهایی از API مراکز خوانده می‌شود.</p>
+        </div>
+      </div>
+    </section>
+
+    <div class="trust-strip">
+      <div class="container trust-strip__inner">
+        <span class="trust-strip__label">مراکز <strong>همکار</strong></span>
+        <div class="ticker">
+          <div class="ticker__track">
+            <span class="ticker__item"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#i-hospital"></use></svg><b>مرکز وصال شیراز</b> · نوبت‌دهی آنلاین</span>
+            <span class="ticker__item"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#i-shield"></use></svg>تأیید هویت اهداکننده</span>
+            <span class="ticker__item"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#i-hospital"></use></svg><b>مرکز ونک تهران</b> · پذیرش ۲۴ ساعته</span>
+            <span class="ticker__item"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#i-route"></use></svg>مسیریابی بر اساس فاصله</span>
+            <span class="ticker__item"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#i-hospital"></use></svg><b>مرکز اصفهان</b> · اهدای پلاکت</span>
+            <span class="ticker__item"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#i-bell"></use></svg>فراخوان لحظه‌ای</span>
+            <span class="ticker__item"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#i-hospital"></use></svg><b>مرکز وصال شیراز</b> · نوبت‌دهی آنلاین</span>
+            <span class="ticker__item"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#i-shield"></use></svg>تأیید هویت اهداکننده</span>
+            <span class="ticker__item"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#i-hospital"></use></svg><b>مرکز ونک تهران</b> · پذیرش ۲۴ ساعته</span>
+            <span class="ticker__item"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#i-route"></use></svg>مسیریابی بر اساس فاصله</span>
+            <span class="ticker__item"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#i-hospital"></use></svg><b>مرکز اصفهان</b> · اهدای پلاکت</span>
+            <span class="ticker__item"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#i-bell"></use></svg>فراخوان لحظه‌ای</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <section class="section process" id="process">
+      <div class="container">
+        <div class="section-head" data-reveal>
+          <div class="section-head__text">
+            <span class="eyebrow">مسیر اهدا</span>
+            <h2>چهار قدم تا یک لبخند</h2>
+            <p class="lead">از ثبت‌نام تا اهدا، همه‌چیز روشن و کوتاه است. شما فقط آمادگی‌تان را اعلام می‌کنید؛ بقیه‌اش با هم‌خون.</p>
+          </div>
+          <span class="hand-note" aria-hidden="true">
+            ساده‌تر از آنچه فکر می‌کنید
+            <svg class="squiggle" viewBox="0 0 90 24"><path d="M2 18C20 4 44 4 62 12c10 4 18 4 26-2" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+          </span>
+        </div>
+
+        <div class="process__steps">
+          <article class="step-card" data-reveal style="--d:.02s">
+            <span class="step-card__num" aria-hidden="true">۰۱</span>
+            <span class="icon-tile"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#i-user"></use></svg></span>
+            <h3>پروفایل می‌سازید</h3>
+            <p>گروه خونی، شهر و آخرین زمان اهدا را ثبت می‌کنید تا فراخوان‌ها دقیق‌تر به شما برسد.</p>
+          </article>
+          <article class="step-card" data-reveal style="--d:.1s">
+            <span class="step-card__num" aria-hidden="true">۰۲</span>
+            <span class="icon-tile"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#i-activity"></use></svg></span>
+            <h3>آمادگی را اعلام می‌کنید</h3>
+            <p>یک کلید ساده؛ هر وقت آماده بودید فعال می‌شوید و هر وقت نبودید، بی‌دردسر خاموش.</p>
+          </article>
+          <article class="step-card" data-reveal style="--d:.18s">
+            <span class="step-card__num" aria-hidden="true">۰۳</span>
+            <span class="icon-tile"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#i-bell"></use></svg></span>
+            <h3>فراخوان نزدیک را می‌بینید</h3>
+            <p>فقط نیازهایی که با گروه خونی و محدوده‌ی شما هم‌خوانی دارد، در اولویت نمایش قرار می‌گیرد.</p>
+          </article>
+          <article class="step-card" data-reveal style="--d:.26s">
+            <span class="step-card__num" aria-hidden="true">۰۴</span>
+            <span class="icon-tile"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#i-hospital"></use></svg></span>
+            <h3>در مرکز حاضر می‌شوید</h3>
+            <p>زمان و مرکز پیشنهادی را تأیید می‌کنید و با راهنمایی کارشناسان مرکز، اهدا انجام می‌شود.</p>
+          </article>
+        </div>
+
+        <div class="process__foot" data-reveal>
+          <p class="small muted">مناسب‌بودن نهایی برای اهدا همیشه توسط پزشک مرکز اهدای خون تعیین می‌شود.</p>
+          <a class="link-arrow" href="pages/login.html?purpose=register">
+            ساخت پروفایل داوطلب
+            <svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#i-arrow-left"></use></svg>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section-band" id="why">
+      <div class="container">
+        <div class="section-head" data-reveal>
+          <div class="section-head__text">
+            <span class="eyebrow">چرا هم‌خون</span>
+            <h2>فراخوانی که به آدم‌ها می‌رسد</h2>
+            <p class="lead">به‌جای پیام‌های پراکنده و تماس‌های بی‌نتیجه، نیاز واقعی را به نزدیک‌ترین داوطلبِ مناسب می‌رسانیم.</p>
+          </div>
+        </div>
+
+        <div class="bento">
+          <figure class="bento__visual" data-reveal>
+            <img src="assets/images/center-interior.webp" alt="فضای روشن و آرام یک مرکز اهدای خون" width="1280" height="853" loading="lazy" />
+            <div class="bento__metric">
+              <b>۳۶ مرکز</b>
+              در ۹ استان کشور
+            </div>
+            <figcaption class="bento__visual-copy">
+              <span class="tag">محیطی آرام و امن</span>
+              <h3>مرکزی نزدیک، تیمی مهربان</h3>
+              <p>همه‌ی مراکز همکار، استانداردهای ایمنی اهدا را رعایت می‌کنند و مسیر شما تا رسیدن به تخت اهدا کوتاه است.</p>
+            </figcaption>
+          </figure>
+
+          <div class="bento__grid">
+            <article class="feature-card" data-reveal="right" style="--d:.04s">
+              <div class="feature-card__top">
+                <span class="icon-tile"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#i-route"></use></svg></span>
+                <span class="feature-card__index">۰۱</span>
+              </div>
+              <div>
+                <h3>مسیریابی هوشمند</h3>
+                <p>نزدیک‌ترین مرکز با توجه به فاصله، ساعات کاری و نوع اهدا پیشنهاد می‌شود؛ بدون جست‌وجوی دستی.</p>
+              </div>
+            </article>
+            <article class="feature-card feature-card--dark" data-reveal="right" style="--d:.1s">
+              <div class="feature-card__top">
+                <span class="icon-tile"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#i-bell"></use></svg></span>
+                <span class="feature-card__index">۰۲</span>
+              </div>
+              <div>
+                <h3>اطلاع‌رسانی لحظه‌ای</h3>
+                <p>از فراخوان فوری تا تأیید نوبت، همه‌ی تغییرها بی‌درنگ در پنل و پیامک شما دیده می‌شود.</p>
+              </div>
+            </article>
+            <article class="feature-card feature-card--coral" data-reveal="right" style="--d:.16s">
+              <div class="feature-card__top">
+                <span class="icon-tile"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#i-lock"></use></svg></span>
+                <span class="feature-card__index">۰۳</span>
+              </div>
+              <div>
+                <h3>حریم خصوصی شما</h3>
+                <p>دسترسی به موقعیت مکانی فقط با اجازه‌ی شما فعال می‌شود و هر زمان قابل لغو است.</p>
+              </div>
+            </article>
+            <article class="feature-card" data-reveal="right" style="--d:.22s">
+              <div class="feature-card__top">
+                <span class="icon-tile"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#i-activity"></use></svg></span>
+                <span class="feature-card__index">۰۴</span>
+              </div>
+              <div>
+                <h3>پایش تا لحظه‌ی اهدا</h3>
+                <p>وضعیت درخواست، پاسخ داوطلبان و زمان مراجعه در یک نمای ساده برای مرکز و اهداکننده روشن است.</p>
+              </div>
+            </article>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section stories" id="stories">
+      <div class="container">
+        <div class="stories__head" data-reveal>
+          <div>
+            <span class="eyebrow">قصه‌های هم‌خون</span>
+            <h2>هر اهدا، یک روایت تازه</h2>
+            <p class="lead">از زبان داوطلبانی که مسیرشان با هم‌خون گره خورده است.</p>
+          </div>
+          <div class="stories__controls">
+            <button class="icon-btn" type="button" data-story-prev aria-label="قصه‌ی قبلی">
+              <svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#i-arrow-right"></use></svg>
+            </button>
+            <button class="icon-btn" type="button" data-story-next aria-label="قصه‌ی بعدی">
+              <svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#i-arrow-left"></use></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="stories__track" data-story-track tabindex="0" aria-label="کاروسل قصه‌های اهداکنندگان">
+          <article class="story-card" data-reveal>
+            <div class="story-card__media">
+              <img src="assets/images/platelet-donation.webp" alt="اهدای پلاکت در یک مرکز مجهز" width="1200" height="800" loading="lazy" />
+              <span class="story-card__tag">اهدای پلاکت</span>
+              <span class="story-card__arrow" aria-hidden="true"><svg class="icon"><use href="assets/icons/sprite.svg#i-arrow-left"></use></svg></span>
+            </div>
+            <div class="story-card__body">
+              <p class="story-card__quote">«پلاکت من برای یک بیمار کم‌خون مدام لازم بود. هم‌خون هر بار نزدیک‌ترین مرکز را نشانم می‌داد و دیگر بین این‌همه بیمارستان گم نمی‌شدم.»</p>
+              <div class="story-card__meta">
+                <span class="avatar avatar--sm">م</span>
+                <span>
+                  <span class="story-card__name">مریم، اهداکننده پلاکت</span>
+                  <span class="story-card__place">شیراز · ۱۴ نوبت اهدا</span>
+                </span>
+              </div>
+            </div>
+          </article>
+
+          <article class="story-card" data-reveal style="--d:.08s">
+            <div class="story-card__media">
+              <img src="assets/images/blood-bag.webp" alt="کیسه‌ی خون آماده در مرکز اهدا" width="1200" height="800" loading="lazy" />
+              <span class="story-card__tag">اهدای خون کامل</span>
+              <span class="story-card__arrow" aria-hidden="true"><svg class="icon"><use href="assets/icons/sprite.svg#i-arrow-left"></use></svg></span>
+            </div>
+            <div class="story-card__body">
+              <p class="story-card__quote">«گروه خونی O منفی کمیاب است. یک شب پیام فوری آمد، صبح رفتم و فهمیدم برای یک مادر باردار بوده. هنوز هم به آن شب فکر می‌کنم.»</p>
+              <div class="story-card__meta">
+                <span class="avatar avatar--sm avatar--coral">س</span>
+                <span>
+                  <span class="story-card__name">سارا، داوطلب O منفی</span>
+                  <span class="story-card__place">تهران · ۷ نوبت اهدا</span>
+                </span>
+              </div>
+            </div>
+          </article>
+
+          <article class="story-card" data-reveal style="--d:.16s">
+            <div class="story-card__media">
+              <img src="assets/images/hero-donation.webp" alt="همراهی کارشناس مرکز با یک داوطلب" width="900" height="1200" loading="lazy" />
+              <span class="story-card__tag">اولین تجربه</span>
+              <span class="story-card__arrow" aria-hidden="true"><svg class="icon"><use href="assets/icons/sprite.svg#i-arrow-left"></use></svg></span>
+            </div>
+            <div class="story-card__body">
+              <p class="story-card__quote">«همیشه می‌ترسیدم. با هم‌خون زمان نوبت را گرفتم و کارشناس مرکز قدم‌به‌قدم همراهی‌ام کرد. حالا هر سه ماه می‌روم.»</p>
+              <div class="story-card__meta">
+                <span class="avatar avatar--sm">ر</span>
+                <span>
+                  <span class="story-card__name">رضا، اهداکننده تازه‌کار</span>
+                  <span class="story-card__place">اصفهان · ۲ نوبت اهدا</span>
+                </span>
+              </div>
+            </div>
+          </article>
+        </div>
+
+        <div class="stories__foot">
+          <span class="tiny muted">برای دیدن بقیه‌ی قصه‌ها بکشید</span>
+          <div class="stories__progress" aria-hidden="true"><span data-story-progress></span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section--tight">
+      <div class="container">
+        <div class="cta-panel" data-reveal>
+          <div class="cta-panel__visual">
+            <div class="cta-panel__frame">
+              <img src="assets/images/center-interior.webp" alt="تخت اهدای خون در مرکز" width="1280" height="853" loading="lazy" />
+            </div>
+            <div class="cta-panel__chip">
+              <span class="float-card__pulse">
+                <svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#i-phone"></use></svg>
+              </span>
+              <span>
+                <b>پشتیبانی ۲۴ ساعته</b>
+                <span>همراه شما در تمام مسیر</span>
+              </span>
+            </div>
+          </div>
+          <div class="cta-panel__copy">
+            <span class="eyebrow">نوبت شماست</span>
+            <h2>امروز، زندگیِ کسی را روشن کنید</h2>
+            <p>ثبت‌نام کمتر از دو دقیقه وقت می‌گیرد. با ساخت پروفایل، فقط وقتی که واقعاً آماده‌اید فراخوان دریافت می‌کنید.</p>
+            <div class="cta-panel__actions">
+              <a class="btn btn--primary" href="pages/login.html?purpose=register">
+                <span class="btn__label">ساخت حساب داوطلب</span>
+                <svg class="icon icon-arrow" aria-hidden="true"><use href="assets/icons/sprite.svg#i-arrow-left"></use></svg>
+              </a>
+              <a class="btn btn--ghost" href="pages/login.html">ورود به حساب</a>
+            </div>
+            <p class="cta-panel__note">
+              <svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#i-shield"></use></svg>
+              اطلاعات شما محفوظ است و بدون اجازه در اختیار کسی قرار نمی‌گیرد.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section faq" id="faq">
+      <div class="container faq__grid">
+        <div class="faq__intro" data-reveal>
+          <span class="eyebrow">سوال‌های پرتکرار</span>
+          <h2>هر چیزی که باید بدانید</h2>
+          <p>اگر پاسخ سوالتان اینجا نبود، تیم پشتیبانی هم‌خون هر روز از ۸ صبح تا ۱۰ شب در دسترس است.</p>
+          <div class="faq__contact">
+            <span class="avatar avatar--ink">ه</span>
+            <p>
+              <strong>گفت‌وگو با پشتیبانی</strong>
+              پاسخ معمولاً کمتر از ۱۵ دقیقه
+              <br>
+              <a class="link-arrow small" href="tel:02100000000">۰۲۱–۰۰۰۰۰۰۰۰</a>
+            </p>
+          </div>
+        </div>
+
+        <div class="faq-list" data-accordion data-reveal="left">
+          <div class="faq-item is-open">
+            <button class="faq-item__q" type="button" aria-expanded="true">
+              آیا هم‌خون تصمیم می‌گیرد من برای اهدا مناسب هستم؟
+              <span class="faq-item__icon"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#i-chevron-down"></use></svg></span>
+            </button>
+            <div class="faq-item__a"><div><p>نه. هم‌خون فقط فراخوان‌ها را به داوطلبان مناسب می‌رساند و زمان مراجعه را هماهنگ می‌کند. ارزیابی نهایی سلامت و مناسب‌بودن اهدا همیشه توسط پزشک مرکز اهدای خون انجام می‌شود.</p></div></div>
+          </div>
+          <div class="faq-item">
+            <button class="faq-item__q" type="button" aria-expanded="false">
+              اهدای خون چقدر طول می‌کشد؟
+              <span class="faq-item__icon"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#i-chevron-down"></use></svg></span>
+            </button>
+            <div class="faq-item__a"><div><p>مدت زمان دقیق به نظر پزشک و نوع اهدا بستگی دارد. در فرم نوبت‌دهی، بازه‌ی تقریبی هر مرکز نمایش داده می‌شود تا بتوانید برنامه‌ی روزتان را هماهنگ کنید.</p></div></div>
+          </div>
+          <div class="faq-item">
+            <button class="faq-item__q" type="button" aria-expanded="false">
+              اطلاعات موقعیت مکانی من چطور استفاده می‌شود؟
+              <span class="faq-item__icon"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#i-chevron-down"></use></svg></span>
+            </button>
+            <div class="faq-item__a"><div><p>دسترسی به موقعیت فقط زمانی فعال می‌شود که خودتان اجازه بدهید و تنها برای پیشنهاد نزدیک‌ترین مرکز استفاده می‌شود. هر زمان بخواهید می‌توانید این اجازه را از پروفایل لغو کنید.</p></div></div>
+          </div>
+          <div class="faq-item">
+            <button class="faq-item__q" type="button" aria-expanded="false">
+              برای اهدا باید چه آمادگی‌هایی داشته باشم؟
+              <span class="faq-item__icon"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#i-chevron-down"></use></svg></span>
+            </button>
+            <div class="faq-item__a"><div><p>توصیه‌های آمادگی (خواب کافی، تغذیه و مصرف مایعات) را مرکز اهدای خون بر اساس شرایط شما ارائه می‌کند. اگر داروی خاصی مصرف می‌کنید، پیش از مراجعه با کارشناسان مرکز مشورت کنید.</p></div></div>
+          </div>
+          <div class="faq-item">
+            <button class="faq-item__q" type="button" aria-expanded="false">
+              استفاده از هم‌خون هزینه‌ای دارد؟
+              <span class="faq-item__icon"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#i-chevron-down"></use></svg></span>
+            </button>
+            <div class="faq-item__a"><div><p>ثبت‌نام و دریافت فراخوان برای داوطلبان کاملاً رایگان است. هم‌خون هیچ مبلغی بابت واسطه‌گری اهدا دریافت نمی‌کند.</p></div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer__grid">
+        <div class="footer__brand">
+          <a class="brand brand--light" href="index.html" aria-label="هم‌خون">
+            <svg class="brand__mark" viewBox="0 0 64 64" aria-hidden="true">
+              <rect width="64" height="64" rx="20" fill="none"/>
+              <path d="M32 12c0 0-13 11.2-13 20.2a13 13 0 0 0 26 0C45 23.2 32 12 32 12Z" fill="none" stroke="currentColor" stroke-width="2.6"/>
+              <path d="M32 40c-3.9-3-6-5.3-6-7.7a3.6 3.6 0 0 1 6-2.5 3.6 3.6 0 0 1 6 2.5c0 2.4-2.1 4.7-6 7.7Z" fill="#D9584C"/>
+            </svg>
+            <span>
+              <span class="brand__name">هم‌خون</span>
+              <span class="brand__sub">اهدای هوشمند، زندگی دوباره</span>
+            </span>
+          </a>
+          <p>سامانه‌ی هوشمند فراخوان و مسیریابی داوطلبان اهدای خون؛ ساخته‌شده برای اینکه فاصله‌ی میان یک اهداکننده و یک زندگی، کوتاه‌تر شود.</p>
+          <div class="footer__socials">
+            <a href="#" aria-label="تلگرام هم‌خون"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#i-telegram"></use></svg></a>
+            <a href="#" aria-label="اینستاگرام هم‌خون"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#i-instagram"></use></svg></a>
+            <a href="#" aria-label="لینکدین هم‌خون"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#i-linkedin"></use></svg></a>
+          </div>
+        </div>
+
+        <div class="footer__col">
+          <h4>سامانه</h4>
+          <ul>
+            <li><a href="#process">چطور کار می‌کند</a></li>
+            <li><a href="pages/login.html?purpose=register">ثبت‌نام داوطلب</a></li>
+            <li><a href="pages/login.html">ورود مراکز</a></li>
+            <li><a href="#faq">سوال‌های پرتکرار</a></li>
+          </ul>
+        </div>
+
+        <div class="footer__col">
+          <h4>برای اهداکنندگان</h4>
+          <ul>
+            <li><a href="pages/donor-profile.html">پروفایل و گروه خونی</a></li>
+            <li><a href="pages/donor-dashboard.html">فراخوان‌های من</a></li>
+            <li><a href="#stories">قصه‌های اهدا</a></li>
+            <li><a href="#why">حریم خصوصی</a></li>
+          </ul>
+        </div>
+
+        <div class="footer__col footer__col--wide">
+          <h4>پشتیبانی</h4>
+          <ul>
+            <li><a href="tel:02100000000">۰۲۱–۰۰۰۰۰۰۰۰</a></li>
+            <li><a href="mailto:hello@hamkhoon.demo">hello@hamkhoon.demo</a></li>
+            <li><a href="#faq">راهنمای استفاده</a></li>
+            <li><a href="#faq">شرایط استفاده</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer__bottom">
+        <span>© ۱۴۰۵ هم‌خون · نسخه‌ی نمایشی پروژه‌ی دانشگاهی · همه‌ی داده‌ها نمونه هستند.</span>
+        <span class="footer__bottom-links">
+          <button class="footer__credits-btn" type="button" data-open-dialog="#credits">اعتبار تصاویر و فونت</button>
+          <a href="#faq">حریم خصوصی</a>
+        </span>
+      </div>
+    </div>
+  </footer>
+
+  <dialog class="modal" id="credits" data-backdrop-close aria-labelledby="credits-title">
+    <div class="modal__panel">
+      <div class="modal__head">
+        <h2 id="credits-title">اعتبار منابع</h2>
+        <button class="modal__close" type="button" data-close-dialog aria-label="بستن">
+          <svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#i-x"></use></svg>
+        </button>
+      </div>
+      <div class="stack">
+        <p class="small muted">
+          تصاویر این نسخه‌ی نمایشی از آرشیوهای آزاد انتخاب شده‌اند:
+        </p>
+        <ul class="stack small">
+          <li>عکس اهدای خون و کیسه‌ی خون: U.S. Air Force، عکاس Tech. Sgt. Nicholas Alder — مالکیت عمومی (Public Domain).</li>
+          <li>عکس مرکز اهدا و اهدای پلاکت: R. Henrik Nilsson — مجوز CC BY 4.0، از Wikimedia Commons.</li>
+          <li>قلم Vazirmatn: پروژه‌ی Vazirmatn، مجوز SIL Open Font License 1.1.</li>
+        </ul>
+        <p class="tiny muted">این پروژه یک نمونه‌ی دانشگاهی است و به هیچ سازمان درمانی وابسته نیست.</p>
+      </div>
+      <div class="modal__actions">
+        <button class="btn btn--soft" type="button" data-close-dialog>بستن</button>
+      </div>
+    </div>
+  </dialog>
+</body>
+</html>
