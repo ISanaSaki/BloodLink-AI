@@ -19,13 +19,15 @@
 | API contract | `schemas/*`, `main.py` | `test_api_contract.py` |
 | Demo data | `scripts/seed_demo.py` | `test_seed_demo.py` |
 
-- What is **deliberately not built** (owner: Asra):
+- What was **built by Asra** (PR #1, merged 2026-11-10):
   - `api/v1/endpoints/centers.py` — `GET /centers`, `GET/PATCH /centers/{id}`, `POST /centers`
     (admin).
   - `api/v1/endpoints/blood_requests.py` — Create/List/Detail/PATCH(draft)/activate/cancel/responses.
   - `api/v1/endpoints/donor_availability.py` — `PATCH /donors/me/availability`.
-  - Registering the three routers in `api/v1/router.py` (the commented block is right there; only 4
-    lines to uncomment, no Git conflict).
+  - The three routers are registered in `api/v1/router.py`; `docs/API_CONTRACT.md` documents the
+    endpoints (sections 6-7). The PR arrived without tests and with two issues the merge fixed:
+    a missing `AvailabilityStatus` import in `donor_availability.py` (NameError at runtime) and
+    Persian endpoint messages (the repo is now fully English).
   - Owner: Shaghayeq — all of `frontend/**`, including `pages/respond.html` which consumes the
     `?token=` link of the SMS.
 - Integration contract (so we can work in parallel without breaking tests):
@@ -38,6 +40,5 @@
      `DonorAvailability.is_available_at`, so don't duplicate the availability logic.
   5. For `activate` use `BloodRequest.transition_to(ACTIVE)` (the state machine + `activated_at`
      come for free).
-- Consequences: the demo runs without Asra's code (seed + dispatch + donor response); but the full
-  "operator creates a request" flow is closed through the API until those endpoints are registered.
-  For the demo, `scripts/seed_demo.py` and a DB status change can be used.
+- Consequences: the full "operator creates a request" flow is now open through the API
+  (PR #1). Asra's endpoints still need their own test coverage (integration contract item 2).

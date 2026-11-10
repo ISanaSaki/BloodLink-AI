@@ -28,5 +28,5 @@ class BloodRequestUpdate(BaseModel):
     @model_validator(mode="after")
     def at_least_one(self):
         if not self.model_dump(exclude_unset=True):
-            raise ValueError("حداقل یک فیلد برای ویرایش ارسال کنید.")
+            raise ValueError("Send at least one field to edit.")
         return self

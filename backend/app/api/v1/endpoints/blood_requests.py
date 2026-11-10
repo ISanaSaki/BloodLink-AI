@@ -32,16 +32,16 @@ def _request_out(row: BloodRequest, include_notes: bool = False) -> dict:
 
 def _owned_request(db: DatabaseSession, request_id: UUID, user: User) -> BloodRequest:
     row = db.get(BloodRequest, request_id)
-    if row is None: raise NotFound("درخواست خون یافت نشد.")
+    if row is None: raise NotFound("Blood request not found.")
     assert_center_access(db, user, row.center_id)
     return row
 
-@router.post("", status_code=201, summary="ایجاد درخواست خون (پیش‌نویس)")
+@router.post("", status_code=201, summary="Create a blood request (draft)")
 def create_blood_request(payload: BloodRequestCreate, user: CurrentUser, db: DatabaseSession) -> dict:
     if user.role != UserRole.CENTER_OPERATOR: raise Forbidden()
     center = assert_center_access(db, user, payload.center_id)
-    if not center.is_active: raise Conflict("مرکز غیرفعال است.")
-    if payload.expires_at <= datetime.now(UTC): raise BadRequest("زمان انقضا باید در آینده باشد.")
+    if not center.is_active: raise Conflict("The centre is inactive.")
+    if payload.expires_at <= datetime.now(UTC): raise BadRequest("The expiry time must be in the future.")
     row = BloodRequest(center_id=center.id, component_type=payload.component_type, blood_group=payload.blood_group,
         rh_factor=payload.rh_factor, units_needed=payload.units_needed, urgency=payload.urgency,
         status=BloodRequestStatus.DRAFT, expires_at=payload.expires_at, notes=payload.notes, created_by=user.id)
@@ -50,7 +50,7 @@ def create_blood_request(payload: BloodRequestCreate, user: CurrentUser, db: Dat
     db.commit(); db.refresh(row)
     return envelope(_request_out(row, True))
 
-@router.get("", summary="فهرست درخواست‌های خون")
+@router.get("", summary="List blood requests")
 def list_blood_requests(user: CurrentUser, db: DatabaseSession, page_params: PageParams,
                         status_filter: BloodRequestStatus | None = None, center_id: UUID | None = None,
                         component_type: ComponentType | None = None, blood_group: BloodGroup | None = None,
@@ -71,45 +71,45 @@ def list_blood_requests(user: CurrentUser, db: DatabaseSession, page_params: Pag
     rows = db.scalars(stmt.order_by(BloodRequest.created_at.desc()).offset((page-1)*page_size).limit(page_size)).all()
     return paginated([_request_out(r, include_notes) for r in rows], page=page, page_size=page_size, total=total)
 
-@router.get("/{request_id}", summary="جزئیات درخواست خون")
+@router.get("/{request_id}", summary="Blood request details")
 def get_blood_request(request_id: UUID, user: CurrentUser, db: DatabaseSession) -> dict:
     row = db.get(BloodRequest, request_id)
-    if row is None: raise NotFound("درخواست خون یافت نشد.")
+    if row is None: raise NotFound("Blood request not found.")
     if user.role == UserRole.DONOR:
-        if row.status != BloodRequestStatus.ACTIVE: raise NotFound("درخواست خون یافت نشد.")
+        if row.status != BloodRequestStatus.ACTIVE: raise NotFound("Blood request not found.")
     else: assert_center_access(db, user, row.center_id)
     return envelope(_request_out(row, user.role != UserRole.DONOR))
 
-@router.patch("/{request_id}", summary="ویرایش پیش‌نویس درخواست")
+@router.patch("/{request_id}", summary="Edit a draft request")
 def update_blood_request(request_id: UUID, payload: BloodRequestUpdate, user: CurrentUser, db: DatabaseSession) -> dict:
     if user.role != UserRole.CENTER_OPERATOR: raise Forbidden()
     row = _owned_request(db, request_id, user)
-    if row.status != BloodRequestStatus.DRAFT: raise Conflict("فقط درخواست پیش‌نویس قابل ویرایش است.")
+    if row.status != BloodRequestStatus.DRAFT: raise Conflict("Only a draft request can be edited.")
     updates = payload.model_dump(exclude_unset=True)
-    if "expires_at" in updates and updates["expires_at"] <= datetime.now(UTC): raise BadRequest("زمان انقضا باید در آینده باشد.")
+    if "expires_at" in updates and updates["expires_at"] <= datetime.now(UTC): raise BadRequest("The expiry time must be in the future.")
     for key, value in updates.items(): setattr(row, key, value)
     AuditService(db).record(action="blood_request_updated", entity_type="blood_request", actor_id=user.id, entity_id=row.id, details={"fields":sorted(updates)})
     db.commit(); db.refresh(row)
     return envelope(_request_out(row, True))
 
-@router.post("/{request_id}/activate", summary="فعال‌سازی درخواست")
+@router.post("/{request_id}/activate", summary="Activate a request")
 def activate_blood_request(request_id: UUID, user: CurrentUser, db: DatabaseSession) -> dict:
     if user.role != UserRole.CENTER_OPERATOR: raise Forbidden()
     row = _owned_request(db, request_id, user)
-    if row.status != BloodRequestStatus.DRAFT: raise Conflict("فقط درخواست پیش‌نویس قابل فعال‌سازی است.")
+    if row.status != BloodRequestStatus.DRAFT: raise Conflict("Only a draft request can be activated.")
     center = db.get(BloodCenter, row.center_id)
-    if center is None or not center.is_verified or not center.is_active: raise Conflict("مرکز باید تأییدشده و فعال باشد.")
-    if row.expires_at <= datetime.now(UTC): raise Conflict("زمان اعتبار درخواست به پایان رسیده است.")
+    if center is None or not center.is_verified or not center.is_active: raise Conflict("The centre must be verified and active.")
+    if row.expires_at <= datetime.now(UTC): raise Conflict("The request validity period has ended.")
     row.transition_to(BloodRequestStatus.ACTIVE)
     AuditService(db).record(action="blood_request_activated", entity_type="blood_request", actor_id=user.id, entity_id=row.id)
     db.commit(); db.refresh(row)
     return envelope(_request_out(row, True))
 
-@router.post("/{request_id}/cancel", summary="لغو درخواست")
+@router.post("/{request_id}/cancel", summary="Cancel a request")
 def cancel_blood_request(request_id: UUID, user: CurrentUser, db: DatabaseSession) -> dict:
     if user.role != UserRole.CENTER_OPERATOR: raise Forbidden()
     row = _owned_request(db, request_id, user)
-    if row.status not in (BloodRequestStatus.DRAFT, BloodRequestStatus.ACTIVE): raise Conflict("این درخواست قابل لغو نیست.")
+    if row.status not in (BloodRequestStatus.DRAFT, BloodRequestStatus.ACTIVE): raise Conflict("This request cannot be cancelled.")
     row.transition_to(BloodRequestStatus.CANCELLED)
     queued = db.scalars(select(Notification).where(Notification.request_id == row.id, Notification.status == NotificationStatus.QUEUED)).all()
     for notification in queued: notification.transition_to(NotificationStatus.CANCELLED)
@@ -117,7 +117,7 @@ def cancel_blood_request(request_id: UUID, user: CurrentUser, db: DatabaseSessio
     db.commit(); db.refresh(row)
     return envelope(_request_out(row, True))
 
-@router.get("/{request_id}/responses", summary="پاسخ‌های داوطلبان به فراخوان")
+@router.get("/{request_id}/responses", summary="Donor responses to the call")
 def list_responses(request_id: UUID, user: CurrentUser, db: DatabaseSession, page_params: PageParams) -> dict:
     row = _owned_request(db, request_id, user)
     page, page_size = page_params
