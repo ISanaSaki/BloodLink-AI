@@ -23,7 +23,7 @@ def to_profile_out(profile) -> DonorProfileOut:
     )
 
 
-@router.patch("/profile", summary="تکمیل پروفایل داوطلب")
+@router.patch("/profile", summary="Complete the donor profile")
 def patch_donor_profile(
     payload: DonorProfilePatch,
     user: DonorUser,

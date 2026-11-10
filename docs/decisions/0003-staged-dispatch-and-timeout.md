@@ -1,25 +1,31 @@
-# ۰۰۰۳ — مرحله‌بندی فراخوان:Beat مسئول پیشرفت مرحله است، نه task ارسال
+# 0003 — Staged dispatch: Beat owns stage progression, not the sending task
 
-- وضعیت: پذیرفته‌شده (۲۰۲۶-۱۱-۰۴) — مالک: ثنا
-- زمینه: بخش ۱۱.۳ سند می‌گوید فراخوان مرحله‌ای ارسال شود و تا پایان پنجره پاسخ، مرحله بعدی نرود.
-  پیاده‌سازی اولیه، خود `dispatch_notification_batch` با `apply_async(countdown=…)` مرحله بعد را زمان‌بندی می‌کرد.
-  این طرح دو اشکال عملی داشت: (الف) در حالت eager/تست و در اجرای بدون Redis، همه مراحل بلافاصله fire می‌شدند؛
-  (ب) با restart ورکر، زمان‌بندی درون حافظه Celery از بین می‌رفت و مرحله‌ای هرگز ارسال نمی‌شد.
-- تصمیم:
-  1. `dispatch_notification_batch(request_id, batch_number)` **دقیقاً یک مرحله** می‌فرستد و هیچ زنجیره‌ای نمی‌سازد.
-  2. progression از وضعیت دیتابیس خوانده می‌شود: `NotificationService.advance_due_batches(now)`
-     برای هر درخواست `active` که منقضی نشده، کوچک‌ترین مرحله `queued` را زمانی آزاد می‌کند که
-     `now - max(updated_at of sent/delivered) >= DISPATCH_RESPONSE_WINDOW_MINUTES` باشد.
-  3. تسک Beat `check-dispatch-timeout` هر ۶۰ ثانیه `expire_overdue()` و سپس `advance_due_batches()` را اجرا و
-     برای هر جفت `(request_id, batch_number)` فرستاده‌شده، `dispatch_notification_batch.delay(...)` می‌زند.
-  4. توقف‌ها قبل از ارسال بررسی می‌شوند: درخواست terminal/non-active/expired/fulfilled → `send_batch` صفر برمی‌گرداند
-     و پیامکی نمی‌فرستد (تست‌های `test_state_machines.py`).
-- پیامد:
-  - دمو/تست بدون Redis درست کار می‌کند و با یک `celery beat` واقعی هم همان مسیر اجرا می‌شود.
-  - ثبت تسک‌ها با `imports` صریح در `celery_app.py` انجام می‌شود؛ `autodiscover_tasks(["app.tasks"])` ماژول
-    `notification_tasks` را پیدا نمی‌کرد و کارگر با رجیستری خالی بالا می‌آمد (تست‌ها سبز می‌ماندند).
-    دو تست در `test_dispatch.py` این را قفل می‌کنند.
-  - حداکثر تأخیر بین دو مرحله = پنجره پاسخ + ۶۰ ثانیه (دقت Beat)؛ برای MVP قابل قبول است.
-  - اگر Beat خاموش بماند، مرحله بعدی ارسال نمی‌شود — این عمدی است (ارسال بی‌رویه بدتر است) و در README یادآوری شده.
-  - اسرا برای `POST /blood-requests/{id}/cancel` فقط باید `cancel_pending_notifications` را صدا بزند؛
-    منطق مرحله‌بندی دوباره نوشته نمی‌شود.
+- Status: accepted (2026-11-04) — Owner: Sana
+- Context: document section 11.3 says the dispatch must be sent in stages and must not advance to
+  the next stage before the response window ends. The initial implementation scheduled the next
+  stage from `dispatch_notification_batch` itself with `apply_async(countdown=…)`. That design had
+  two practical flaws: (a) in eager/test mode and in runs without Redis, all stages fired
+  immediately; (b) a worker restart destroyed Celery's in-memory schedule and a stage was never
+  sent.
+- Decision:
+  1. `dispatch_notification_batch(request_id, batch_number)` sends **exactly one stage** and builds
+     no chain.
+  2. Progression is read from the database state: `NotificationService.advance_due_batches(now)`
+     releases, for each `active` non-expired request, the smallest `queued` stage once
+     `now - max(updated_at of sent/delivered) >= DISPATCH_RESPONSE_WINDOW_MINUTES`.
+  3. The Beat task `check-dispatch-timeout` runs `expire_overdue()` then `advance_due_batches()`
+     every 60 seconds and calls `dispatch_notification_batch.delay(...)` for each dispatched
+     `(request_id, batch_number)` pair.
+  4. Stops are checked before sending: terminal/non-active/expired/fulfilled request → `send_batch`
+     returns zero and sends no SMS (`test_state_machines.py` tests).
+- Consequences:
+  - The demo/tests work correctly without Redis, and a real `celery beat` runs the exact same path.
+  - Task registration is done with explicit `imports` in `celery_app.py`;
+    `autodiscover_tasks(["app.tasks"])` did not find the `notification_tasks` module and the worker
+    started with an empty registry (tests stayed green). Two tests in `test_dispatch.py` lock this.
+  - Maximum delay between two stages = response window + 60 seconds (Beat precision); acceptable for
+    the MVP.
+  - If Beat stays off, the next stage is not sent — this is intentional (careless sending is worse)
+    and is noted in the README.
+  - For `POST /blood-requests/{id}/cancel`, Asra only needs to call `cancel_pending_notifications`;
+    the staging logic is not rewritten.

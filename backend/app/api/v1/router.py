@@ -24,7 +24,6 @@ api_router.include_router(dispatch.router)
 api_router.include_router(notifications.router)
 
 # Registered here by their owners, keeping this file conflict-free (section 16.2):
-#   from app.api.v1.endpoints import blood_requests, centers, donor_availability  # اسرا
 api_router.include_router(centers.router)
 api_router.include_router(blood_requests.router)
 api_router.include_router(donor_availability.router)

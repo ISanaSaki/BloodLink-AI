@@ -173,7 +173,7 @@ class OtpService:
             _rate_key(config.secret_key, "resend", phone), config.otp_resend_seconds
         )
         if locked:
-            raise RateLimited("برای ارسال مجدد کد کمی صبر کنید.", retry_after_seconds=locked)
+            raise RateLimited("Please wait before requesting another code.", retry_after_seconds=locked)
 
         self._enforce_window(_rate_key(config.secret_key, "phone", phone), config.otp_max_requests_per_phone)
         self._enforce_window(
@@ -202,14 +202,14 @@ class OtpService:
         """Raise on any mismatch; a successful verify consumes the challenge once."""
         challenge = self._store.load(challenge_id)
         if challenge is None:
-            raise Unauthorized("کد تأیید نامعتبر یا منقضی شده است.")
+            raise Unauthorized("The verification code is invalid or has expired.")
         if challenge.phone != phone or challenge.purpose != purpose:
             self._store.delete(challenge_id)
-            raise Unauthorized("کد تأیید با این شماره یا هدف مطابقت ندارد.")
+            raise Unauthorized("The verification code does not match this phone or purpose.")
 
         if not otp_matches(code, phone, purpose, challenge.code_hash):
             self._register_failure(challenge)
-            raise Unauthorized("کد وارد شده صحیح نیست.")
+            raise Unauthorized("The code you entered is incorrect.")
 
         self._store.delete(challenge_id)
 
@@ -217,14 +217,14 @@ class OtpService:
         attempts = challenge.attempts + 1
         if attempts >= self._config.otp_max_attempts:
             self._store.delete(challenge.challenge_id)
-            raise RateLimited("تلاش بیش از حد مجاز است. کد جدید بگیرید.")
+            raise RateLimited("Too many attempts. Request a new code.")
         self._store.save(replace(challenge, attempts=attempts))
 
     def _enforce_window(self, key: str, limit: int) -> None:
         used = self._store.count(key, self._config.otp_rate_limit_window_seconds)
         if used > limit:
             raise RateLimited(
-                "حداکثر تعداد مجاز درخواست کد در این بازه زمانی استفاده شده است.",
+                "The maximum number of code requests for this period has been used.",
                 retry_after_seconds=self._config.otp_rate_limit_window_seconds,
             )
 
@@ -234,10 +234,10 @@ def get_or_create_user(db: Session, phone: str, purpose: OtpPurpose) -> tuple[Us
     user = db.scalar(select(User).where(User.phone == phone))
     if user is not None:
         if not user.is_active:
-            raise Unauthorized("حساب شما غیرفعال شده است.")
+            raise Unauthorized("Your account has been disabled.")
         return user, False
     if purpose is not OtpPurpose.REGISTER:
-        raise NotFound("حسابی با این شماره یافت نشد؛ ابتدا ثبت‌نام کنید.")
+        raise NotFound("No account found for this phone; register first.")
 
     user = User(phone=phone, role=UserRole.DONOR, is_active=True)
     db.add(user)

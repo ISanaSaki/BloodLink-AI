@@ -76,7 +76,7 @@ class BloodRequest(Base, UUIDPrimaryKeyMixin, TimestampMixin):
         """Apply a state-machine transition or raise 409 CONFLICT (section 15)."""
         if target not in TRANSITIONS[self.status]:
             raise Conflict(
-                f"انتقال وضعیت از {self.status.value} به {target.value} مجاز نیست.",
+                f"Transitioning from {self.status.value} to {target.value} is not allowed.",
                 details=[{"field": "status", "message": f"{self.status.value} -> {target.value}"}],
             )
         self.status = target

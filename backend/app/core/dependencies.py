@@ -32,7 +32,7 @@ def get_current_user(request: Request, db: DatabaseSession) -> User:
     try:
         claims = decode_access_token(token)
     except PyJWTError as exc:
-        raise Unauthorized("توکن نامعتبر یا منقضی شده است.") from exc
+        raise Unauthorized("The token is invalid or has expired.") from exc
 
     user = db.get(User, claims.user_id)
     if user is None or not user.is_active:
@@ -65,11 +65,11 @@ def assert_center_access(db: Session, user: User, center_id: UUID) -> "BloodCent
 
     center = db.get(BloodCenter, center_id)
     if center is None:
-        raise NotFound("مرکز یافت نشد.")
+        raise NotFound("Centre not found.")
     if user.role is UserRole.ADMIN:
         return center
     if user.role is not UserRole.CENTER_OPERATOR or center.owner_user_id != user.id:
-        raise Forbidden("این مرکز به حساب شما متصل نیست.")
+        raise Forbidden("This centre is not linked to your account.")
     return center
 
 
@@ -81,8 +81,8 @@ def get_client_ip(request: Request) -> str:
 
 
 def get_page_params(
-    page: Annotated[int, Query(ge=1, description="صفحه از 1")] = 1,
-    page_size: Annotated[int, Query(ge=1, le=100, description="حداکثر 100")] = 20,
+    page: Annotated[int, Query(ge=1, description="Page number, starting at 1")] = 1,
+    page_size: Annotated[int, Query(ge=1, le=100, description="Items per page, at most 100")] = 20,
 ) -> tuple[int, int]:
     return page, page_size
 

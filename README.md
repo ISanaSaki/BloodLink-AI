@@ -1,38 +1,39 @@
-# سامانه هوشمند فراخوان و مسیریابی داوطلبان اهدای خون — MVP
+# Smart Blood-Donation Call-Out and Donor Routing System — MVP
 
-پیاده‌سازی سهم **ثنا (Backend Lead)** از سند تیمی v2.0.
-اسرا و شقایق بر پایه همین contract کار می‌کنند؛ فایل‌های سهم آن‌ها ساخته نشده و در
-[`docs/decisions/0005-scope-and-handoff.md`](docs/decisions/0005-scope-and-handoff.md) نقطه اتصال دقیق‌شان آمده است.
+Implementation of **Sana's (Backend Lead)** share of team document v2.0.
+Asra and Shaghayeq work against the same contract; their files are not built yet and their exact
+integration point is documented in [`docs/decisions/0005-scope-and-handoff.md`](docs/decisions/0005-scope-and-handoff.md).
 
-- قرارداد API (وضعیت اجراشده): [`docs/API_CONTRACT.md`](docs/API_CONTRACT.md)
-- مدل داده: [`docs/ERD.md`](docs/ERD.md)
-- تصمیم‌های فنی و انحراف‌های مستند: [`docs/decisions/`](docs/decisions/)
+- API contract (implemented state): [`docs/API_CONTRACT.md`](docs/API_CONTRACT.md)
+- Data model: [`docs/ERD.md`](docs/ERD.md)
+- Technical decisions and documented deviations: [`docs/decisions/`](docs/decisions/)
 
-## ۱. پیش‌نیاز
+## 1. Prerequisites
 
-- Python 3.12+، Docker (برای PostgreSQL و Redis)، و یک پورت آزاد برای Postgres.
-- در این ماشین Postgres روی ۵۴۳۲ سرویس لوکال است؛ کانتینر پروژه پورت **۵۴۳۳** را می‌گیرد تا سرویس شما دست‌نخورده بماند.
-- اگر سیستم‌تان proxy ویندوزی دارد (مثل `127.0.0.1:10809`)، برای `pip`/`pytest`/`alembic` از `NO_PROXY='*'` استفاده کنید،
-  وگرنه درخواست‌های localhost timeout می‌خورند.
+- Python 3.12+, Docker (for PostgreSQL and Redis), and a free port for Postgres.
+- On this machine Postgres runs as a local service on 5432; the project container takes port **5433**
+  so your service stays untouched.
+- If your system has a Windows proxy (e.g. `127.0.0.1:10809`), use `NO_PROXY='*'` for
+  `pip`/`pytest`/`alembic`, otherwise localhost requests time out.
 
-## ۲. راه‌اندازی
+## 2. Setup
 
 ```bash
 cd "D:/Blood Donation/blood-donation-system"
 
-# 1) دیتابیس و Redis
-docker compose up -d db redis                 # postgres روی host:5433، redis روی host:6380
+# 1) Database and Redis
+docker compose up -d db redis                 # postgres on host:5433, redis on host:6380
 
-# 2) محیط پایتون
+# 2) Python environment
 cd backend
 python -m venv .venv && source .venv/Scripts/activate
 NO_PROXY='*' pip install -e ".[dev]"
 
-# 3) تنظیمات (فایل واقعی .env هرگز commit نمی‌شود)
-cp ../.env.example .env                       # بعد SECRET_KEY را عوض کنید
-# مقدارهای پیش‌فرض برای اجرای روی host ساخته شده‌اند (۵۴۳۳ و ۶۳۸۰)
+# 3) Settings (the real .env file is never committed)
+cp ../.env.example .env                       # then change SECRET_KEY
+# default values are built for running on the host (5433 and 6380)
 
-# 4) مهاجرت و داده نمایشی
+# 4) Migrations and demo data
 NO_PROXY='*' python -m alembic upgrade head
 NO_PROXY='*' python -m scripts.seed_demo
 
@@ -40,97 +41,104 @@ NO_PROXY='*' python -m scripts.seed_demo
 NO_PROXY='*' uvicorn app.main:app --reload --port 8000
 ```
 
-Swagger: `http://localhost:8000/docs` — سلامت: `GET /api/v1/health`.
+Swagger: `http://localhost:8000/docs` — health: `GET /api/v1/health`.
 
-### Worker و Beat (اختیاری در دمو)
+### Worker and Beat (optional in the demo)
 
 ```bash
 celery -A app.tasks.celery_app worker --loglevel=INFO --pool=solo -Q notifications,default
 celery -A app.tasks.celery_app beat   --loglevel=INFO
 ```
 
-`--pool=solo` مخصوص ویندوز است؛ API، worker و beat باید هر سه همان broker را ببینند
-(`.env.example` به Redis کانتینر روی پورت ۶۳۸۰ اشاره می‌کند).
+`--pool=solo` is Windows-specific; the API, the worker and beat must all see the same broker
+(`.env.example` points to the Redis container on port 6380).
 
-Beat تسک `check-dispatch-timeout` را هر ۶۰ ثانیه اجرا می‌کند: درخواست‌های گذشته را `expired` می‌کند و
-**مرحله بعدی فراخوان را آزاد می‌کند**. اگر Beat خاموش باشد، فقط مرحله اول ارسال می‌شود — این رفتار عمدی است
-(تصمیم ۰۰۰۳) و ارسال بی‌رویه مرحله‌های بعدی جایگزین آن نیست.
+Beat runs the `check-dispatch-timeout` task every 60 seconds: it marks overdue requests `expired`
+and **releases the next dispatch stage**. If Beat is off, only the first stage is sent — this
+behavior is intentional (decision 0003) and is not a substitute for carelessly sending later stages.
 
-Redis باید ۶ یا بالاتر باشد. اگر روی ماشین از قبل Redis 5 روی ۶۳۷۹ اجراست، کارگر موقع start با
-`Error running script ... ERR syntax error` می‌ایستد — آن اسکریپت Lua خود kombu است، نه کد پروژه؛
-همین دلیل پورت ۶۳۸۰ در compose است.
+Redis must be 6 or higher. If Redis 5 is already running on 6379 on the machine, the worker stops
+at startup with `Error running script ... ERR syntax error` — that Lua script is kombu's own, not
+project code; this is exactly why compose uses port 6380.
 
-سنجش زنده با `DISPATCH_BATCH_SIZE=1` و `DISPATCH_RESPONSE_WINDOW_MINUTES=1`: مرحله ۱ در لحظه dispatch به
-`sent` رسید (mock-000000)، مرحله ۲ در تیک Beat بعدی و مرحله ۳ در تیک پس از آن — سه پیامک، هر کدام با لینک پاسخ.
+Live check with `DISPATCH_BATCH_SIZE=1` and `DISPATCH_RESPONSE_WINDOW_MINUTES=1`: stage 1 reached
+`sent` at dispatch time (mock-000000), stage 2 on the next Beat tick and stage 3 on the tick after
+that — three SMS messages, each with a response link.
 
-## ۳. تست
+## 3. Tests
 
 ```bash
 cd backend
 NO_PROXY='*' python -m pytest app/tests -q
 ```
 
-- تست‌ها روی **PostgreSQL واقعی** (`blood_donation_test` روی پورت ۵۴۳۳) اجرا می‌شوند و
-  اسکیمای test را با همان زنجیره مهاجرت Alembic می‌سازند، پس هر اجرای تست `alembic upgrade head` را هم اثبات می‌کند.
-- Redis لازم نیست:OTP store درون‌حافظه‌ای و Celery در حالت eager است.
-- بررسی drift مدل/مهاجرت: `NO_PROXY='*' python -m alembic check` (باید `No new upgrade operations detected` بدهد).
+- Tests run against **real PostgreSQL** (`blood_donation_test` on port 5433) and build the test
+  schema with the same Alembic migration chain, so every test run also proves `alembic upgrade head`.
+- Redis is not needed: the OTP store is in-memory and Celery runs in eager mode.
+- Model/migration drift check: `NO_PROXY='*' python -m alembic check` (must print
+  `No new upgrade operations detected`).
 
-## ۴. جریان دمو (INT-01)
+## 4. Demo flow (INT-01)
 
-کد OTP و لینک پاسخ در لاگ چاپ **نمی‌شوند** (بخش ۱۴ سند). در حالت توسعه، mock provider آن‌ها را در
-`backend/.dev-outbox.log` می‌نویسد:
+The OTP code and the response link are **not** printed in logs (document section 14). In development
+mode, the mock provider writes them to `backend/.dev-outbox.log`:
 
 ```bash
-# 1) دریافت کد برای اپراتور مرکز نمونه
+# 1) Request a code for the demo centre operator
 curl -s -X POST localhost:8000/api/v1/auth/otp/request \
   -H 'Content-Type: application/json' \
   -d '{"phone":"+989120000002","purpose":"login"}'
-tail -1 .dev-outbox.log                        # کد شش‌رقمی اینجا است
+tail -1 .dev-outbox.log                        # the six-digit code is here
 
-# 2) تأیید و توکن
+# 2) Verify and get a token
 curl -s -X POST localhost:8000/api/v1/auth/otp/verify \
   -H 'Content-Type: application/json' \
   -d '{"challenge_id":"<id>","phone":"+989120000002","code":"<code>","purpose":"login"}'
 
-# 3) فعال‌سازی درخواست (این endpoint سهم اسرا است؛ فعلاً در DB)
+# 3) Activate the request (this endpoint is Asra's share; for now in the DB)
 #    UPDATE blood_requests SET status='active', activated_at=now() WHERE id='<uuid>';
 
-# 4) فراخوان مرحله‌ای
+# 4) Staged dispatch
 curl -s -X POST localhost:8000/api/v1/blood-requests/<request_id>/dispatch -H "Authorization: Bearer <token>"
 curl -s localhost:8000/api/v1/blood-requests/<request_id>/candidates -H "Authorization: Bearer <token>"
 
-# 5) پاسخ داوطلب (لینک امن در پیامک، یا با توکن داوطلب)
+# 5) Donor response (secure link in the SMS, or with a donor token)
 curl -s -X POST localhost:8000/api/v1/notifications/<notification_id>/response \
   -H "Authorization: Bearer <donor_token>" -H 'Content-Type: application/json' \
   -d '{"response":"interested","eta_minutes":18}'
 ```
 
-پیش‌نیاز فعال‌سازی دمو: `COMPATIBILITY_POLICY=demo` و `SMS_PROVIDER=mock` (پیش‌فرض `.env.example`).
+Demo activation prerequisites: `COMPATIBILITY_POLICY=demo` and `SMS_PROVIDER=mock`
+(defaults in `.env.example`).
 
-## ۵. قوانین سقف‌دار (همه در کد و تست قفل شده‌اند)
+## 5. Hard limits (all locked in code and tests)
 
-- شماره تماس، کد OTP، توکن و مختصات در هیچ لاگی ظاهر نمی‌شوند؛ کد OTP فقط hash می‌شود و از broker رد نمی‌شود.
-- پنل مرکز هیچ‌وقت شماره، نام یا مختصات داوطلب نمی‌گیرد؛ فقط `donor_reference` بی‌نام.
-- لغو رضایت مکان، رکورد موقعیت را حذف می‌کند.
-- هیچ قواعد بالینی ساخته نمی‌شود؛ تطابق نوع، اعلامی و برچسب‌خورده `demo` است.
-- فراخوان مرحله‌ای با کلید idempotency؛ پاسخ داوطلب یک‌بارمصرف؛ توقف روی fulfilled/cancelled/expired.
+- Phone numbers, OTP codes, tokens and coordinates never appear in any log; the OTP code is only
+  hashed and never passes through the broker.
+- The centre panel never receives a donor's phone, name or coordinates; only the anonymous
+  `donor_reference`.
+- Revoking location consent deletes the location record.
+- No clinical rules are built; type matching is declared-only and labelled `demo`.
+- Staged dispatch with idempotency keys; one-time donor response; stop on fulfilled/cancelled/expired.
 
-## ۶. ساختار
+## 6. Structure
 
 ```
-backend/app/core        تنظیمات، امنیت، خطاها، لاگ، dependencyها
-backend/app/db/models   مدل‌ها + ماشین‌وضعیت‌ها (Alembic autogenerate از همین‌جا)
-backend/app/schemas     پوشش {data,meta} و shapes بخش ۹
-backend/app/services    OTP، Matching، Dispatch، پیامک، نقشه، audit، donor
+backend/app/core        settings, security, errors, logging, dependencies
+backend/app/db/models   models + state machines (Alembic autogenerate runs from here)
+backend/app/schemas     {data,meta} envelope and section 9 shapes
+backend/app/services    OTP, Matching, Dispatch, SMS, maps, audit, donor
 backend/app/tasks       Celery worker/beat
-backend/app/api/v1      endpointهای ثنا + بلاک ثبت routerهای اسرا
-backend/scripts         seed_demo.py (داده نمایشی)
+backend/app/api/v1      Sana's endpoints + the block registering Asra's routers
+backend/scripts         seed_demo.py (demo data)
 ```
 
-## ۷. گیت (بخش ۱۶ سند)
+## 7. Git (document section 16)
 
-- `main` نسخه پایدار، `develop` محل یکپارچه‌سازی — **اسرا و شقایق از `develop` شاخه می‌زنند**.
-- کار هر نفر روی `feature/<name>` و merge با `--no-ff` به `develop`.
-- پیام commitها Conventional Commits است: `feat|fix|test|docs|chore(scope): چرا این تغییر`.
-- remote تنظیم نشده و چیزی push نشده؛ `.env`، `.dev-outbox.log` و فایل‌های runtime Celery در
-  `.gitignore` هستند و فقط `.env.example` با placeholder commit می‌شود.
+- `main` is the stable version, `develop` is the integration branch — **Asra and Shaghayeq branch
+  from `develop`**.
+- Each person works on `feature/<name>` and merges into `develop` with `--no-ff`.
+- Commits use Conventional Commits: `feat|fix|test|docs|chore(scope): why this change`.
+- The remote is `https://github.com/ISanaSaki/BloodLink-AI`; `main` and `develop` are pushed there.
+  `.env`, `.dev-outbox.log` and Celery runtime files are in `.gitignore` and only `.env.example`
+  with placeholders is committed.

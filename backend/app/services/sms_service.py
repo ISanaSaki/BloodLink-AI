@@ -62,9 +62,6 @@ def _write_dev_outbox(to: str, body: str) -> None:
     except OSError as exc:
         logger.warning("dev_outbox_write_failed", extra={"error_type": type(exc).__name__})
 
-    def clear(self) -> None:
-        self.messages.clear()
-
 
 def mask_phone(phone: str) -> str:
     """Section 14: complete phone numbers must not reach the log."""
@@ -92,16 +89,16 @@ def mock_provider() -> MockSmsProvider:
 
 
 def build_otp_message(code: str, ttl_seconds: int) -> str:
-    return f"کد تأیید یکبار مصرف شما: {code}. این کد {ttl_seconds} ثانیه معتبر است."
+    return f"Your one-time code: {code}. It is valid for {ttl_seconds} seconds."
 
 
 def build_dispatch_message(center_name: str, response_url: str) -> str:
     return (
-        f"یک فراخوان اهدای خون در مرکز {center_name} ثبت شده است.\n"
-        f"در صورت تمایل و امکان، جزئیات و پاسخ خود را از لینک امن زیر مشاهده کنید:\n{response_url}\n"
-        "این پیام به معنی تأیید صلاحیت پزشکی شما نیست."
+        f"A blood donation call has been opened at {center_name}.\n"
+        f"If you are able, view the details and respond through the secure link below:\n{response_url}\n"
+        "This message does not confirm your medical eligibility."
     )
 
 
 def build_cancellation_message(center_name: str) -> str:
-    return f"فراخوان اهدای خون در مرکز {center_name} متوقف شده است. از توجه شما سپاسگزاریم."
+    return f"The blood donation call at {center_name} has been stopped. Thank you for your attention."

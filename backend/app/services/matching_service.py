@@ -111,7 +111,7 @@ class DemoDeclaredTypePolicy:
 class DispatchNotConfigured(Conflict):
     def __init__(self) -> None:
         super().__init__(
-            "قواعد رسمی سازگاری فرآورده/گروه پیکربندی نشده است؛ فقط حالت demo فعال است.",
+            "No official product/group compatibility rules are configured; only the demo mode is active.",
             details=[{"field": "compatibility_policy", "message": "official source required"}],
         )
 
@@ -135,17 +135,17 @@ class MatchingService:
         config = self.config or settings
         request = self.db.get(BloodRequest, request_id)
         if request is None:
-            raise NotFound("درخواست خون یافت نشد.")
+            raise NotFound("Blood request not found.")
         if request.status is not BloodRequestStatus.ACTIVE:
             raise Conflict(
-                "فقط درخواست در وضعیت active قابل فراخوان است.",
+                "Only a request in the active state can be dispatched.",
                 details=[{"field": "status", "message": request.status.value}],
             )
         center = self.db.get(BloodCenter, request.center_id)
         if center is None:
-            raise NotFound("مرکز این درخواست یافت نشد.")
+            raise NotFound("Centre not found for this request.")
         if not center.accepts_new_requests():
-            raise Forbidden("مرکز هنوز تأیید نشده یا غیرفعال است.")
+            raise Forbidden("The centre is not verified or is inactive.")
 
         inp = MatchingInput(
             request_id=request.id,
@@ -162,10 +162,10 @@ class MatchingService:
         moment = now or datetime.now(UTC)
         center = self.db.get(BloodCenter, inp.center_id)
         if center is None:
-            raise NotFound("مرکز این درخواست یافت نشد.")
+            raise NotFound("Centre not found for this request.")
         request = self.db.get(BloodRequest, inp.request_id)
         if request is None:
-            raise NotFound("درخواست خون یافت نشد.")
+            raise NotFound("Blood request not found.")
 
         rows = self.db.scalars(self._candidate_query(inp, moment)).all()
         destination = Coordinate.from_decimals(center.latitude, center.longitude)

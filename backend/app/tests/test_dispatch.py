@@ -340,8 +340,8 @@ def test_dispatch_does_not_expose_internal_notes(client, center_factory, request
     donor_factory()
 
     body = dispatch(client, auth_headers(owner.id, owner.role), request.id).json()
-    assert "یادداشت داخلی مرکز" not in str(body)
-    assert "یادداشت داخلی مرکز" not in str(sent_messages())
+    assert "Centre internal note" not in str(body)
+    assert "Centre internal note" not in str(sent_messages())
 
 
 def test_worker_imports_every_dispatch_task():

@@ -52,7 +52,7 @@ def _enqueue_batch(request_id: UUID, batch_number: int) -> None:
 @router.post(
     "/{request_id}/dispatch",
     status_code=status.HTTP_202_ACCEPTED,
-    summary="شروع Matching و فراخوان مرحله‌ای",
+    summary="Run matching and start the staged dispatch",
 )
 def start_dispatch(request_id: UUID, user: CenterOrAdminUser, db: DatabaseSession) -> dict:
     request = _load_request(db, request_id)
@@ -85,7 +85,7 @@ def start_dispatch(request_id: UUID, user: CenterOrAdminUser, db: DatabaseSessio
     )
 
 
-@router.get("/{request_id}/candidates", summary="مشاهده کاندیداهای رتبه‌بندی‌شده")
+@router.get("/{request_id}/candidates", summary="List ranked donor candidates")
 def list_candidates(
     request_id: UUID,
     user: CenterOrAdminUser,
@@ -139,5 +139,5 @@ def list_candidates(
 def _load_request(db: Session, request_id: UUID) -> BloodRequest:
     request = db.get(BloodRequest, request_id)
     if request is None:
-        raise NotFound("درخواست خون یافت نشد.")
+        raise NotFound("Blood request not found.")
     return request

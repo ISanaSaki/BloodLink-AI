@@ -8,7 +8,7 @@ from app.schemas.common import envelope
 router = APIRouter(tags=["system"])
 
 
-@router.get("/health", summary="سلامت سرویس")
+@router.get("/health", summary="Service health")
 def health() -> dict:
     return envelope(
         {
