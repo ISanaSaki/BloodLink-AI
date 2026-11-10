@@ -4,14 +4,16 @@ from fastapi import APIRouter
 
 from app.api.v1.endpoints import (
     auth,
+    blood_requests,
+    centers,
     dispatch,
+    donor_availability,
     donor_location,
     donor_profile,
     health,
     notifications,
     users,
 )
-
 api_router = APIRouter()
 api_router.include_router(health.router)
 api_router.include_router(auth.router)
@@ -23,6 +25,6 @@ api_router.include_router(notifications.router)
 
 # Registered here by their owners, keeping this file conflict-free (section 16.2):
 #   from app.api.v1.endpoints import blood_requests, centers, donor_availability  # اسرا
-#   api_router.include_router(centers.router)
-#   api_router.include_router(blood_requests.router)
-#   api_router.include_router(donor_availability.router)
+api_router.include_router(centers.router)
+api_router.include_router(blood_requests.router)
+api_router.include_router(donor_availability.router)
