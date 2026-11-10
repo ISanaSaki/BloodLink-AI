@@ -27,13 +27,13 @@ def _payload(center: BloodCenter, *, distance_km: float | None = None, can_manag
     if can_manage: data["is_verified"] = center.is_verified
     return data
 
-@router.get("", summary="فهرست مراکز فعال")
+@router.get("", summary="List active centres")
 def list_centers(user: CurrentUser, db: DatabaseSession, page_params: PageParams,
                  latitude: float | None = Query(default=None, ge=-90, le=90),
                  longitude: float | None = Query(default=None, ge=-180, le=180),
                  radius_km: float | None = Query(default=None, ge=0, le=500)) -> dict:
     if (latitude is None) != (longitude is None):
-        raise BadRequest("طول و عرض جغرافیایی باید با هم ارسال شوند.")
+        raise BadRequest("Latitude and longitude must be sent together.")
     page, page_size = page_params
     stmt = select(BloodCenter).where(BloodCenter.is_active.is_(True)).order_by(BloodCenter.name)
     centers = db.scalars(stmt).all()
@@ -47,15 +47,15 @@ def list_centers(user: CurrentUser, db: DatabaseSession, page_params: PageParams
     window = scored[(page-1)*page_size:page*page_size]
     return paginated([_payload(c, distance_km=d) for d,c in window], page=page, page_size=page_size, total=len(scored))
 
-@router.get("/{center_id}", summary="جزئیات مرکز")
+@router.get("/{center_id}", summary="Centre details")
 def get_center(center_id: UUID, user: CurrentUser, db: DatabaseSession) -> dict:
     center = db.get(BloodCenter, center_id)
-    if center is None: raise NotFound("مرکز اهدای خون یافت نشد.")
+    if center is None: raise NotFound("Blood centre not found.")
     can_manage = user.role == UserRole.ADMIN or (user.role == UserRole.CENTER_OPERATOR and center.owner_user_id == user.id)
-    if not center.is_active and not can_manage: raise NotFound("مرکز اهدای خون یافت نشد.")
+    if not center.is_active and not can_manage: raise NotFound("Blood centre not found.")
     return envelope(_payload(center, can_manage=can_manage))
 
-@router.post("", status_code=201, summary="ایجاد مرکز (مدیر سامانه)")
+@router.post("", status_code=201, summary="Create a centre (system admin)")
 def create_center(payload: CenterCreate, user: CurrentUser, db: DatabaseSession) -> dict:
     if user.role != UserRole.ADMIN: raise Forbidden()
     data = payload.model_dump()
@@ -63,21 +63,21 @@ def create_center(payload: CenterCreate, user: CurrentUser, db: DatabaseSession)
     if owner_user_id is not None:
         owner = db.get(User, owner_user_id)
         if owner is None or owner.role != UserRole.CENTER_OPERATOR:
-            raise BadRequest("مالک مرکز باید حساب معتبر center_operator باشد.")
+            raise BadRequest("The centre owner must be a valid center_operator account.")
     center = BloodCenter(**data, owner_user_id=owner_user_id)
     db.add(center); db.flush()
     AuditService(db).record(action="center_created", entity_type="blood_center", actor_id=user.id, entity_id=center.id, details={"name":center.name})
     db.commit(); db.refresh(center)
     return envelope(_payload(center, can_manage=True))
 
-@router.patch("/{center_id}", summary="ویرایش مرکز")
+@router.patch("/{center_id}", summary="Edit a centre")
 def update_center(center_id: UUID, payload: CenterUpdate, user: CurrentUser, db: DatabaseSession) -> dict:
     center = db.get(BloodCenter, center_id)
-    if center is None: raise NotFound("مرکز اهدای خون یافت نشد.")
+    if center is None: raise NotFound("Blood centre not found.")
     is_admin = user.role == UserRole.ADMIN
     if not is_admin and not (user.role == UserRole.CENTER_OPERATOR and center.owner_user_id == user.id): raise Forbidden()
     updates = payload.model_dump(exclude_unset=True)
-    if not is_admin and ({"is_verified", "is_active"} & updates.keys()): raise Forbidden("تغییر وضعیت تأیید یا فعال‌سازی فقط در اختیار مدیر است.")
+    if not is_admin and ({"is_verified", "is_active"} & updates.keys()): raise Forbidden("Only an admin can change the verification or activation status.")
     for key, value in updates.items(): setattr(center, key, value)
     AuditService(db).record(action="center_updated", entity_type="blood_center", actor_id=user.id, entity_id=center.id, details={"fields":sorted(updates)})
     db.commit(); db.refresh(center)

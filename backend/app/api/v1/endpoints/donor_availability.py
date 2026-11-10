@@ -1,6 +1,7 @@
 """Donor availability endpoint contributed by Asra."""
 from fastapi import APIRouter
 from app.core.dependencies import DatabaseSession, DonorUser
+from app.core.enums import AvailabilityStatus
 from app.schemas.donor_availability import AvailabilityUpdate
 from app.db.models.donor_availability import DonorAvailability
 from app.schemas.common import envelope, to_iso_zulu
@@ -9,7 +10,7 @@ from app.services.donor_service import ensure_donor_profile
 
 router = APIRouter(prefix="/donors", tags=["donors"])
 
-@router.patch("/me/availability", summary="تنظیم وضعیت آمادگی داوطلب")
+@router.patch("/me/availability", summary="Set the donor's availability status")
 def update_availability(payload: AvailabilityUpdate, user: DonorUser, db: DatabaseSession) -> dict:
     donor = ensure_donor_profile(db, user)
     availability = donor.availability

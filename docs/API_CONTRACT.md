@@ -11,11 +11,10 @@ Owner: Sana (Backend Lead). Contributors: Asra, Shaghayeq (section 4 of the team
 | --- | --- | --- |
 | `auth`, `users/me`, `donors/me/profile`, `donors/me/location` | Implemented and tested | Sana |
 | `dispatch`, `candidates`, `notifications`, donor response | Implemented and tested | Sana |
-| `centers`, `blood-requests` (CRUD/activate/cancel/responses), `donors/me/availability` | **Pending** (contract = section 9 of the main spec) | Asra |
+| `centers`, `blood-requests` (CRUD/activate/cancel/responses), `donors/me/availability` | Implemented (PR #1, merged 2026-11-10) | Asra |
 | `frontend/**` | Pending | Shaghayeq |
 
-`backend/app/api/v1/router.py` marks the exact spot where Asra's routers are registered; uncomment
-those three lines without touching any other file, so Git conflicts are avoided (section 16.2).
+Asra's routers are registered in `backend/app/api/v1/router.py`.
 
 ## 1. Common Rules (no exceptions)
 
@@ -121,13 +120,23 @@ is `false` unless they have a donor profile).
 - No consent → `403 FORBIDDEN`. Out-of-range coordinates → `422`.
 - Coordinates never appear in logs, in other users' responses or in `/candidates`.
 
-### `PATCH /api/v1/donors/me/availability` — role `donor` (Asra)
+### `PATCH /api/v1/donors/me/availability` — role `donor` → 200 (Asra)
 
-Section 9.5 contract unchanged: `{ "status": "available", "available_from": "...Z", "available_until": "...Z" }`
-with a `{ donor_id, status, available_from, available_until, updated_at }` response.
-The `DonorAvailability` model and the `window_is_ordered` constraint are ready; only the endpoint and
-its schema remain. Note: matching reads this table; if you change `status` or the window semantics,
-re-review `app/services/matching_service.py::_candidate_query` with a test.
+```json
+{ "status": "available", "available_from": "2026-11-10T08:00:00Z", "available_until": "2026-11-10T20:00:00Z" }
+```
+
+```json
+{ "data": { "donor_id": "uuid", "status": "available",
+            "available_from": "2026-11-10T08:00:00Z", "available_until": "2026-11-10T20:00:00Z",
+            "updated_at": "2026-11-10T07:55:00Z" },
+  "meta": { "request_id": "uuid" } }
+```
+
+- `available` requires both times and `available_from < available_until`; `unavailable` must not
+  carry times (else `422`).
+- Matching reads this table (`DonorAvailability.is_available_at`); the window semantics follow
+  section 9.5 of the spec.
 
 ## 5. Dispatch
 
@@ -194,19 +203,54 @@ No body.
 - Side effect: when the `interested` count reaches `units_needed`, the request becomes `fulfilled`
   and the remaining queue is `cancelled`.
 
-### `GET /api/v1/blood-requests/{request_id}/responses` — Asra
+### `GET /api/v1/blood-requests/{request_id}/responses` — owning `center_operator` or `admin` → 200 (Asra)
 
-Section 9.13 contract unchanged. The data is ready in the `donor_responses` table
-(unique `notification_id`, `response`, `responded_at`, `eta_minutes`, `donor_id`).
-For `donor_reference` use `app.api.v1.endpoints.dispatch.donor_reference(donor_id)` so the naming
-stays identical to `/candidates`. Never return phone numbers or coordinates.
+```json
+{ "data": [ { "donor_reference": "donor-9f2c1a7b3e4d", "response": "interested",
+              "responded_at": "2026-11-04T10:35:00Z", "eta_minutes": 18 } ],
+  "meta": { "request_id": "uuid", "page": 1, "page_size": 20, "total": 1 } }
+```
 
-## 6. System
+- `donor_reference` is the same anonymous HMAC as in `/candidates`, so the two views correlate.
+- Never returns phone numbers or coordinates (section 14).
+
+## 6. Centres (Asra — merged PR #1, 2026-11-10)
+
+- `GET /api/v1/centers` — any role → 200. Active centres only, sorted by name; with
+  `latitude`+`longitude` (must come together, else `400`) sorted by distance and optionally
+  filtered by `radius_km`; each row then gains `distance_km`. `is_verified` appears only for the
+  admin or the owning operator.
+- `GET /api/v1/centers/{center_id}` — any role → 200. Inactive centres are `404` unless the caller
+  can manage them.
+- `POST /api/v1/centers` — admin → 201. `owner_user_id`, when given, must be a valid
+  `center_operator` user (else `400`).
+- `PATCH /api/v1/centers/{center_id}` — admin or owning operator → 200. Only the admin may change
+  `is_verified`/`is_active` (else `403`). Empty body → `422`.
+
+## 7. Blood Requests (Asra — merged PR #1, 2026-11-10)
+
+- `POST /api/v1/blood-requests` — owning `center_operator` → 201; starts as `draft`;
+  `expires_at` must be in the future (`400`); inactive centre → `409`.
+- `GET /api/v1/blood-requests` — any role. Donors see only `active` requests; operators see only
+  their own centres' requests. Filters: `status_filter`, `center_id`, `component_type`,
+  `blood_group`, `urgency`. `notes` is included only for non-donors.
+- `GET /api/v1/blood-requests/{request_id}` — any role; donors get `404` for non-`active`
+  requests. `notes` only for non-donors.
+- `PATCH /api/v1/blood-requests/{request_id}` — owning operator; only a `draft` can be edited
+  (`409`); a new `expires_at` must stay in the future.
+- `POST /api/v1/blood-requests/{request_id}/activate` — owning operator; only a `draft` at a
+  verified+active centre, not yet expired (`409` otherwise). Uses the state machine, so
+  `activated_at` is set automatically.
+- `POST /api/v1/blood-requests/{request_id}/cancel` — owning operator; only `draft`/`active`
+  (`409` otherwise). Queued notifications are cancelled with the request.
+- `GET /api/v1/blood-requests/{request_id}/responses` — see section 5 above.
+
+## 8. System
 
 - `GET /api/v1/health` → `{ "data": { "status": "ok", "environment", "api_version", "sms_provider", "maps_provider", "compatibility_policy" }, "meta": ... }`
   It exposes the adapter names, not secret values. `mock` is expected in the demo.
 
-## 7. Integration Notes for the Frontend (Shaghayeq)
+## 9. Integration Notes for the Frontend (Shaghayeq)
 
 - `frontend/js/config.js` must set `API_BASE_URL` to `http://localhost:8000/api/v1`
   (`PUBLIC_APP_BASE_URL` defaults to `http://localhost:5500`; CORS accepts that origin).
