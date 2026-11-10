@@ -11,7 +11,7 @@ from app.services.donor_service import ensure_donor_profile, set_location
 router = APIRouter(prefix="/donors/me", tags=["donors"])
 
 
-@router.patch("/location", summary="ثبت موقعیت فعلی داوطلب")
+@router.patch("/location", summary="Save the donor's current location")
 def patch_donor_location(
     payload: DonorLocationPatch,
     user: DonorUser,

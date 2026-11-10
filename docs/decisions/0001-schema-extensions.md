@@ -1,24 +1,27 @@
-# ۰۰۰۱ — افزونه‌های مدل داده نسبت به جدول بخش ۵ سند
+# 0001 — Data model extensions beyond the section 5 table of the document
 
-- وضعیت: پذیرفته‌شده (۲۰۲۶-۱۱-۰۴) — مالک: ثنا
-- زمینه: جدول بخش ۵ سند، ستون‌های حداقلی را نام می‌برد. چند رفتار الزامی سند (لینک امن پاسخ،
-  مرحله‌بندی فراخوان، شمارش تلاش پیامک، مسئولیت‌پذیری عملیات) بدون ستون قابل پیاده‌سازی نبود،
-  و تغییر نام‌های ازپیش‌تعیین‌شده مجاز نیست.
-- تصمیم: ستون‌های زیر اضافه شد؛ هیچ ستون یا نام موجود حذف/تغییرنیافت. همه در `docs/ERD.md` با برچسب «اضافه» آمده‌اند.
+- Status: accepted (2026-11-04) — Owner: Sana
+- Context: the section 5 table of the document lists minimal columns. Several mandatory behaviors of
+  the document (secure response link, staged dispatch, SMS retry counting, operational
+  accountability) could not be implemented without columns, and renaming the pre-defined names is
+  not allowed.
+- Decision: the columns below were added; no existing column or name was removed or changed. All of
+  them are marked "added" in `docs/ERD.md`.
 
-| جدول | ستون | چرا لازم شد |
+| Table | Column | Why it was needed |
 | --- | --- | --- |
-| `blood_centers` | `opening_hours` | بخش ۹.۷ این فیلد را در خروجی `GET /centers` نام برده است. |
-| `blood_centers` | `owner_user_id` | «اپراتور مرکز»، «مالک مرکز» و access control بخش ۹.۹ نیاز به پیوند کاربر↔مرکز دارند. |
-| `blood_requests` | `notes` | بخش ۹.۸ `notes` را در ورودی می‌گیرد؛ داخلی و ممنوع در پیامک. |
-| `blood_requests` | `activated_at` | پاسخ ۹.۹ باید `activated_at` برگرداند. |
-| `notifications` | `batch_number` | مرحله‌بندی ۱۱.۳ و `dispatch_stage` در ۹.۱۱. |
-| `notifications` | `retry_count`, `failure_reason` | سیاست تلاش مجدد و تشخیص علت شکست پیامک. |
-| `notifications` | `response_token` | «لینک امن» بخش ۱۲؛ یک‌بارمصرف و جدا از JWT. |
-| `donor_responses` | `eta_minutes` | بخش ۹.۱۳ «eta_minutes در صورت اعلام داوطلب». |
-| `audit_logs` | `details`, `request_id`, `comment`, `created_at` | ردیابی عملیات حساس با تطبیق لاگ↔درخواست؛ بدون `created_at` سابقه ارزش اثباتی ندارد. |
+| `blood_centers` | `opening_hours` | Section 9.7 names this field in the `GET /centers` output. |
+| `blood_centers` | `owner_user_id` | "Centre operator", "centre owner" and section 9.9 access control need a user↔centre link. |
+| `blood_requests` | `notes` | Section 9.8 takes `notes` as input; internal and forbidden in SMS. |
+| `blood_requests` | `activated_at` | The 9.9 response must return `activated_at`. |
+| `notifications` | `batch_number` | The 11.3 staging and `dispatch_stage` in 9.11. |
+| `notifications` | `retry_count`, `failure_reason` | The retry policy and diagnosing the SMS failure cause. |
+| `notifications` | `response_token` | The "secure link" of section 12; one-time and separate from the JWT. |
+| `donor_responses` | `eta_minutes` | Section 9.13 "eta_minutes if the donor declares it". |
+| `audit_logs` | `details`, `request_id`, `comment`, `created_at` | Tracing sensitive operations with log↔request correlation; without `created_at` a record has no evidentiary value. |
 
-- پیامد:
-  - تست‌های `test_state_machines.py` و `test_dispatch.py` رفتار این ستون‌ها را قفل می‌کنند.
-  - اسرا/شقایق می‌توانند همین ستون‌ها را در UI و endpointهای خود مصرف کنند؛ نام‌ها change-safe هستند.
-  - هر افزودن بعدی ستون، باید PR جدا + مهاجرت + به‌روزرسانی همین فایل باشد.
+- Consequences:
+  - The `test_state_machines.py` and `test_dispatch.py` tests lock the behavior of these columns.
+  - Asra/Shaghayeq can consume these same columns in their UI and endpoints; the names are
+    change-safe.
+  - Any further column addition requires a separate PR + migration + an update to this file.

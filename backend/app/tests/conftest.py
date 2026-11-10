@@ -103,7 +103,7 @@ def client() -> "TestClient":
 
 # --------------------------------------------------------------------- data factories
 
-OTP_BODY_PATTERN = r"کد تأیید یکبار مصرف شما: (\d{6})"
+OTP_BODY_PATTERN = r"Your one-time code: (\d{6})"
 
 
 def sent_messages() -> list[dict[str, str]]:
@@ -186,14 +186,14 @@ def center_factory(db):
             db.add(owner)
             db.flush()
         center = BloodCenter(
-            name=f"مرکز آزمایشی {uuid4().hex[:6]}",
-            address="تهران، خیابان نمونه",
+            name=f"Test centre {uuid4().hex[:6]}",
+            address="Tehran, Sample Street",
             latitude=Decimal("35.700000"),
             longitude=Decimal("51.400000"),
             phone="+982122222222",
             is_verified=verified,
             is_active=is_active,
-            opening_hours="۲۴ ساعته",
+            opening_hours="24 hours",
             owner_user_id=owner.id if owner else None,
         )
         db.add(center)
@@ -221,7 +221,7 @@ def request_factory(db):
             status=status,
             expires_at=now + timedelta(minutes=minutes),
             created_by=owner.id,
-            notes="یادداشت داخلی مرکز",
+            notes="Centre internal note",
             activated_at=now if status != "draft" else None,
             **kwargs,
         )

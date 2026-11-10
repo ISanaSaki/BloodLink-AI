@@ -1,42 +1,43 @@
-# قرارداد API — نسخه اجرایی (هم‌راستا با سند v2.0)
+# API Contract — Implemented Version (aligned with the v2.0 spec)
 
-این سند وضعیت **کدنویسی‌شده** API را ثبت می‌کند. تا زمانی که Change Log تصمیم جدیدی نیاورد،
-هر تغییر در نام مسیر، نام فیلد یا مقدار enum باید هم‌زمان در این سند، در کد و در تست‌ها اعمال شود.
+This document records the **implemented** API. Until the Change Log declares otherwise, any change
+to a path, a field name or an enum value must be applied here, in the code and in the tests together.
 
-مالک سند: ثنا (Backend Lead). مشارکت: اسرا، شقایق (بخش ۴ سند تیمی).
+Owner: Sana (Backend Lead). Contributors: Asra, Shaghayeq (section 4 of the team spec).
 
-## ۰. وضعیت پیاده‌سازی
+## 0. Implementation Status
 
-| محدوده | وضعیت | مالک |
+| Scope | Status | Owner |
 | --- | --- | --- |
-| `auth`، `users/me`، `donors/me/profile`، `donors/me/location` | پیاده‌سازی و تست‌شده | ثنا |
-| `dispatch`، `candidates`، `notifications`، پاسخ داوطلب | پیاده‌سازی و تست‌شده | ثنا |
-| `centers`، `blood-requests` (CRUD/activate/cancel/responses)، `donors/me/availability` | **در انتظار پیاده‌سازی** (قرارداد همان بخش ۹ سند اصلی است) | اسرا |
-| `frontend/**` | در انتظار پیاده‌سازی | شقایق |
+| `auth`, `users/me`, `donors/me/profile`, `donors/me/location` | Implemented and tested | Sana |
+| `dispatch`, `candidates`, `notifications`, donor response | Implemented and tested | Sana |
+| `centers`, `blood-requests` (CRUD/activate/cancel/responses), `donors/me/availability` | **Pending** (contract = section 9 of the main spec) | Asra |
+| `frontend/**` | Pending | Shaghayeq |
 
-فایل `backend/app/api/v1/router.py` محل دقیق ثبت routerهای اسرا را با کامنت نشان می‌دهد؛ آن سه خط را
-بدون تغییر در فایل‌های دیگر باز کنید تا تضاد Git ایجاد نشود (بخش ۱۶.۲ سند تیمی).
+`backend/app/api/v1/router.py` marks the exact spot where Asra's routers are registered; uncomment
+those three lines without touching any other file, so Git conflicts are avoided (section 16.2).
 
-## ۱. قواعد مشترک (بدون استثنا)
+## 1. Common Rules (no exceptions)
 
-- Base URL توسعه: `http://localhost:8000`؛ همه مسیرها زیر `PREFIX` یعنی `/api/v1`.
-- احراز هویت: `Authorization: Bearer <access_token>`؛ فقط `/auth/otp/*` و `/health` عمومی‌اند.
-- پاسخ موفق: `{ "data": ..., "meta": { "request_id": "uuid", "page"?: int, "page_size"?: int, "total"?: int } }`
-- پاسخ خطا: `{ "error": { "code", "message", "request_id", "details"?: [{ "field", "message" }] } }`
-- `X-Request-Id`: اگر کلاینت بفرستد، همان مقدار در `meta.request_id`، `error.request_id` و هدر پاسخ برمی‌گردد؛
-  اگر نفرستد، سرور یکی می‌سازد. برای گزارش خطا همین هدر را در اسکرین‌شات/تیکت بیاورید.
-- نام فیلدها دقیقاً `snake_case`؛ زمان‌ها ISO-8601 UTC با پسوند `Z`؛ تاریخ بدون ساعت `YYYY-MM-DD`.
-- enum‌ها با حرف کوچک و underscore (مثلاً `awaiting` وجود ندارد؛ `available` / `queued` / `red_cells`).
-- Pagination: `page` از ۱، `page_size` پیش‌فرض ۲۰ و حداکثر ۱۰۰؛ `page_size=101` → `422`.
-- بدنه‌های `PATCH` روی `extra="forbid"` هستند: فیلد ناشناخته → `422` (نه نادیده‌گرفته‌شدن).
+- Dev base URL: `http://localhost:8000`; every path sits under the `/api/v1` prefix.
+- Auth: `Authorization: Bearer <access_token>`; only `/auth/otp/*` and `/health` are public.
+- Success body: `{ "data": ..., "meta": { "request_id": "uuid", "page"?: int, "page_size"?: int, "total"?: int } }`
+- Error body: `{ "error": { "code", "message", "request_id", "details"?: [{ "field", "message" }] } }`
+- `X-Request-Id`: when the client sends it, the same value comes back in `meta.request_id`,
+  `error.request_id` and the response header; otherwise the server generates one. Include this
+  header when reporting an error.
+- Field names are exactly `snake_case`; timestamps are ISO-8601 UTC with a `Z` suffix; dates are `YYYY-MM-DD`.
+- Enums are lowercase with underscores (`awaiting` does not exist; `available` / `queued` / `red_cells`).
+- Pagination: `page` starts at 1, `page_size` defaults to 20 and caps at 100; `page_size=101` → `422`.
+- `PATCH` bodies use `extra="forbid"`: an unknown field → `422` (never silently ignored).
 
-کدهای خطا (بخش ۷.۲): `INVALID_REQUEST` 400، `UNAUTHENTICATED` 401، `FORBIDDEN` 403،
-`RESOURCE_NOT_FOUND` 404، `CONFLICT` 409، `VALIDATION_ERROR` 422، `RATE_LIMITED` 429، `INTERNAL_ERROR` 500.
-بدنه ۵۰ هرگز جزئیات داخلی/stack trace را نشان نمی‌دهد؛ فقط `request_id` برای تطبیق با لاگ.
+Error codes (section 7.2): `INVALID_REQUEST` 400, `UNAUTHENTICATED` 401, `FORBIDDEN` 403,
+`RESOURCE_NOT_FOUND` 404, `CONFLICT` 409, `VALIDATION_ERROR` 422, `RATE_LIMITED` 429, `INTERNAL_ERROR` 500.
+A 500 body never leaks internal detail or a stack trace; it carries only `request_id` for log correlation.
 
-## ۲. Auth
+## 2. Auth
 
-### `POST /api/v1/auth/otp/request` — عمومی → 202
+### `POST /api/v1/auth/otp/request` — public → 202
 
 ```json
 { "phone": "+989121234567", "purpose": "register" }
@@ -47,12 +48,12 @@
   "meta": { "request_id": "uuid" } }
 ```
 
-- `purpose` فقط `register` یا `login`؛ شماره باید E.164 باشد (`PHONE_PATTERN` در `app/schemas/common.py`).
-- ارسال مجدد زودهنگام → `429 RATE_LIMITED` با هدر `Retry-After`.
-- سقف پنجره‌ای: `OTP_MAX_REQUESTS_PER_PHONE` / `OTP_MAX_REQUESTS_PER_IP` (تصمیم ۰۰۰۲).
-- خود OTP فقط به‌صورت HMAC ذخیره می‌شود؛ در هیچ پاسخ یا لاگی ظاهر نمی‌شود.
+- `purpose` is only `register` or `login`; the phone must be E.164 (`PHONE_PATTERN` in `app/schemas/common.py`).
+- Early resend → `429 RATE_LIMITED` with a `Retry-After` header.
+- Window caps: `OTP_MAX_REQUESTS_PER_PHONE` / `OTP_MAX_REQUESTS_PER_IP` (decision 0002).
+- The OTP itself is stored only as an HMAC digest; it never appears in a response or a log.
 
-### `POST /api/v1/auth/otp/verify` — عمومی → 200
+### `POST /api/v1/auth/otp/verify` — public → 200
 
 ```json
 { "challenge_id": "uuid", "phone": "+989121234567", "code": "123456", "purpose": "register" }
@@ -64,15 +65,16 @@
   "meta": { "request_id": "uuid" } }
 ```
 
-- `code` دقیقاً ۶ رقم؛ کد اشتباه/منقضی → `401 UNAUTHENTICATED`. پس از `OTP_MAX_ATTEMPTS` (پیش‌فرض ۵) تلاش ناموفق،
-  چالش قفل و پاسخ `429 RATE_LIMITED` است؛ برای ادامه، کد جدید بگیرید.
-- `purpose=login` برای شماره‌ای که کاربر فعال ندارد → `404 RESOURCE_NOT_FOUND`.
-- کاربر غیرفعال → `401 UNAUTHENTICATED`. چالش یک‌بارمصرف است؛ verify دوم روی همان چالش موفق نمی‌شود.
-- نقش کاربر جدید همیشه `donor` است؛ نقش‌های دیگر را فقط admin می‌سازد.
+- `code` is exactly 6 digits; a wrong or expired code → `401 UNAUTHENTICATED`. After `OTP_MAX_ATTEMPTS`
+  (default 5) failed tries, the challenge locks with `429 RATE_LIMITED`; request a new code to continue.
+- `purpose=login` for a phone without an active user → `404 RESOURCE_NOT_FOUND`.
+- A disabled user → `401 UNAUTHENTICATED`. A challenge is single-use; a second verify on the same
+  challenge never succeeds.
+- A new user's role is always `donor`; other roles are only created by an admin.
 
-## ۳. کاربر جاری
+## 3. Current User
 
-### `GET /api/v1/users/me` — هر نقش → 200
+### `GET /api/v1/users/me` — any role → 200
 
 ```json
 { "data": { "id": "uuid", "phone": "+989121234567", "role": "donor",
@@ -80,11 +82,12 @@
   "meta": { "request_id": "uuid" } }
 ```
 
-`is_profile_complete` یعنی گروه خونی + Rh ثبت شده باشد (فقط برای نقش `donor`؛ برای بقیه `false` نیست مگر پروفایل داوطلب داشته باشند).
+`is_profile_complete` means blood group + Rh are recorded (only for the `donor` role; for other roles it
+is `false` unless they have a donor profile).
 
-## ۴. خودخدمات داوطلب
+## 4. Donor Self-Service
 
-### `PATCH /api/v1/donors/me/profile` — نقش `donor` → 200
+### `PATCH /api/v1/donors/me/profile` — role `donor` → 200
 
 ```json
 { "blood_group": "O", "rh_factor": "positive", "last_donation_date": "2026-05-10",
@@ -98,12 +101,12 @@
   "meta": { "request_id": "uuid" } }
 ```
 
-- `blood_type_verified` در ورودی وجود ندارد؛ ارسال آن → `422` (بخش ۹.۴ سند).
-- بدنه خالی (`{}`) → `422`.
-- لغو `location_consent` باعث **حذف** رکورد موقعیت می‌شود (نه فقط غیرفعال‌سازی).
-- تغییرات در `audit_logs` با نام فیلدها ثبت می‌شود، بدون مقدار حساس.
+- `blood_type_verified` does not exist on input; sending it → `422` (section 9.4 of the spec).
+- An empty body (`{}`) → `422`.
+- Revoking `location_consent` **deletes** the location record (not just disables it).
+- Changes land in `audit_logs` with the field names, without sensitive values.
 
-### `PATCH /api/v1/donors/me/location` — نقش `donor` با `location_consent=true` → 200
+### `PATCH /api/v1/donors/me/location` — role `donor` with `location_consent=true` → 200
 
 ```json
 { "latitude": 35.7050, "longitude": 51.4050 }
@@ -115,22 +118,22 @@
   "meta": { "request_id": "uuid" } }
 ```
 
-- بدون رضایت → `403 FORBIDDEN`. مختصات خارج از بازه → `422`.
-- مختصات هیچ‌وقت در لاگ، پاسخ‌های دیگر کاربران یا `/candidates` ظاهر نمی‌شود.
+- No consent → `403 FORBIDDEN`. Out-of-range coordinates → `422`.
+- Coordinates never appear in logs, in other users' responses or in `/candidates`.
 
-### `PATCH /api/v1/donors/me/availability` — نقش `donor` (اسرا)
+### `PATCH /api/v1/donors/me/availability` — role `donor` (Asra)
 
-قرارداد بخش ۹.۵ بدون تغییر: `{ "status": "available", "available_from": "...Z", "available_until": "...Z" }`
-و پاسخ `{ donor_id, status, available_from, available_until, updated_at }`.
-مدل `DonorAvailability` و قید `window_is_ordered` آماده است؛ فقط endpoint و schema آن باقی مانده.
-نکته: Matching این جدول را می‌خواند؛ اگر `status` یا بازه زمانی را تغییر می‌دهید،
-`app/services/matching_service.py::_candidate_query` را با تست بازبینی کنید.
+Section 9.5 contract unchanged: `{ "status": "available", "available_from": "...Z", "available_until": "...Z" }`
+with a `{ donor_id, status, available_from, available_until, updated_at }` response.
+The `DonorAvailability` model and the `window_is_ordered` constraint are ready; only the endpoint and
+its schema remain. Note: matching reads this table; if you change `status` or the window semantics,
+re-review `app/services/matching_service.py::_candidate_query` with a test.
 
-## ۵. فراخوان (Dispatch)
+## 5. Dispatch
 
-### `POST /api/v1/blood-requests/{request_id}/dispatch` — `center_operator` مالک یا `admin` → 202
+### `POST /api/v1/blood-requests/{request_id}/dispatch` — owning `center_operator` or `admin` → 202
 
-بدنه ندارد.
+No body.
 
 ```json
 { "data": { "dispatch_id": "uuid", "request_id": "uuid", "status": "queued",
@@ -138,12 +141,14 @@
   "meta": { "request_id": "uuid" } }
 ```
 
-- فقط درخواست `active` و مرکز تأییدشده/فعال؛ در غیر این صورت `403` (مرکز تأییدنشده) یا `409` (وضعیت/کاندیدای-empty).
-- درخواست از قبل منقضی‌شده: پاسخ همان `202` است ولی وضعیت به `expired` می‌رود و صف لغو می‌شود (بدون پیامک).
-- ارسال مکرر فراخوان تکراری نمی‌سازد: کلید `idempotency_key = sms:{request}:{donor}:b{batch}`.
-- `candidate_count` فقط کاندیداهای کاملاً تأییدشده (داده/رضایت/آمادگی) است.
+- Only an `active` request at a verified/active centre; otherwise `403` (unverified centre) or
+  `409` (state / empty candidate list).
+- An already-expired request: the response is still `202`, but the request moves to `expired` and the
+  queue is cancelled (no SMS is sent).
+- Re-dispatching never duplicates: `idempotency_key = sms:{request}:{donor}:b{batch}`.
+- `candidate_count` counts only fully verified candidates (data / consent / availability).
 
-### `GET /api/v1/blood-requests/{request_id}/candidates` — `center_operator` مالک یا `admin` → 200
+### `GET /api/v1/blood-requests/{request_id}/candidates` — owning `center_operator` or `admin` → 200
 
 ```json
 { "data": [ { "donor_reference": "donor-9f2c1a7b3e4d", "eta_minutes": 18, "distance_km": 9.0,
@@ -151,26 +156,28 @@
   "meta": { "request_id": "uuid", "page": 1, "page_size": 20, "total": 1 } }
 ```
 
-- `donor_reference` یک HMAC بی‌نام است؛ برای تطبیق با `/responses` استفاده می‌شود، قابل تبدیل به شماره/نام نیست.
-- `eligibility_check_status` مقادیر `verified_data` / `needs_review` دارد؛ فقط `verified_data` فراخوان می‌شود.
-- `dispatch_stage` شماره مرحله‌ای است که داوطلب در آن پیامک می‌گیرد (قبل از ارسال، مرحله برنامه‌ریزی‌شده نمایش داده می‌شود).
+- `donor_reference` is an anonymous HMAC; it exists to correlate with `/responses` and cannot be
+  turned back into a name or a phone number.
+- `eligibility_check_status` is `verified_data` or `needs_review`; only `verified_data` is dispatched.
+- `dispatch_stage` is the stage number in which the donor receives an SMS (before any send, the
+  planned stage is shown).
 
-### `GET /api/v1/notifications` — نقش `donor` → 200
+### `GET /api/v1/notifications` — role `donor` → 200
 
 ```json
 { "data": [ { "id": "uuid", "request_id": "uuid", "channel": "sms", "status": "sent",
               "created_at": "2026-11-04T10:31:00Z", "center_id": "uuid",
-              "center_name": "مرکز اهدای خون نمونه - تهران", "component_type": "red_cells",
+              "center_name": "Tehran Central Blood Center", "component_type": "red_cells",
               "blood_group": "O", "rh_factor": "positive", "urgency": "urgent",
               "expires_at": "2026-11-04T16:00:00Z", "response": null } ],
   "meta": { "request_id": "uuid", "page": 1, "page_size": 20, "total": 1 } }
 ```
 
-- مرتب‌سازی: جدیدترین ابتدا. فقط اعلان‌های خود داوطلب.
-- `response` بعد از ثبت پاسخ: `{ "response": "interested", "responded_at": "...Z" }`.
-- لینک امن پاسخ در پیامک، `?token=` دارد؛ آن توکن در هیچ پاسخ JSON برنمی‌گردد.
+- Order: newest first. Only the donor's own notifications.
+- `response` after answering: `{ "response": "interested", "responded_at": "...Z" }`.
+- The secure response link in the SMS carries `?token=`; that token never comes back in any JSON response.
 
-### `POST /api/v1/notifications/{notification_id}/response` — نقش `donor` → 201
+### `POST /api/v1/notifications/{notification_id}/response` — role `donor` → 201
 
 ```json
 { "response": "interested", "eta_minutes": 18 }
@@ -181,29 +188,30 @@
   "meta": { "request_id": "uuid" } }
 ```
 
-- `response` فقط `interested` یا `unavailable`؛ `eta_minutes` اختیاری و `0..1440`.
-- پاسخ دوم روی همان اعلان → `409 CONFLICT` (`details[].message = already_answered`).
-- اعلانِ داوطلب دیگر → `403`؛ اعلان ناموجود → `404`.
-- اثر جانبی: اگر تعداد `interested` به `units_needed` برسد، درخواست `fulfilled` و صف باقی‌مانده `cancelled` می‌شود.
+- `response` is only `interested` or `unavailable`; `eta_minutes` is optional, range `0..1440`.
+- A second answer on the same notification → `409 CONFLICT` (`details[].message = already_answered`).
+- Another donor's notification → `403`; unknown notification → `404`.
+- Side effect: when the `interested` count reaches `units_needed`, the request becomes `fulfilled`
+  and the remaining queue is `cancelled`.
 
-### `GET /api/v1/blood-requests/{request_id}/responses` — اسرا
+### `GET /api/v1/blood-requests/{request_id}/responses` — Asra
 
-قرارداد بخش ۹.۱۳ بدون تغییر. داده لازم در جدول `donor_responses` آماده است
-(`notification_id` منحصربه‌فرد، `response`، `responded_at`، `eta_minutes`، `donor_id`).
-برای `donor_reference` از `app.api.v1.endpoints.dispatch.donor_reference(donor_id)` استفاده کنید تا
-نام‌گذاری با `/candidates` یکی بماند. شماره تماس و مختصات را برنگردانید.
+Section 9.13 contract unchanged. The data is ready in the `donor_responses` table
+(unique `notification_id`, `response`, `responded_at`, `eta_minutes`, `donor_id`).
+For `donor_reference` use `app.api.v1.endpoints.dispatch.donor_reference(donor_id)` so the naming
+stays identical to `/candidates`. Never return phone numbers or coordinates.
 
-## ۶. سامانه
+## 6. System
 
 - `GET /api/v1/health` → `{ "data": { "status": "ok", "environment", "api_version", "sms_provider", "maps_provider", "compatibility_policy" }, "meta": ... }`
-  نام adapter را نشان می‌دهد، نه مقدار راز. در دمو `mock` انتظار می‌رود.
+  It exposes the adapter names, not secret values. `mock` is expected in the demo.
 
-## ۷. Integration notes برای فرانت‌اند (شقایق)
+## 7. Integration Notes for the Frontend (Shaghayeq)
 
-- `frontend/js/config.js` باید `API_BASE_URL` را به `http://localhost:8000/api/v1` تنظیم کند
-  (پیش‌فرض `PUBLIC_APP_BASE_URL` روی `http://localhost:5500` است؛ CORS همان Origin را می‌پذیرد).
-- توکن را در `sessionStorage` با کلید `blood_access_token` نگه دارید و `X-Request-Id` (uuid ساخته‌شده در مرورگر)
-  را بفرستید تا لاگ سرور و UI قابل تطبیق باشند.
-- روی `error.code` سوئیچ کنید نه روی متن پیام؛ متن‌ها فارسی‌اند و ممکن است تغییر کنند.
-- `401` → هدایت به لاگین، `409` → پیام وضعیت، `429` → غیرفعال‌سازی دکمه تا پایان `Retry-After`.
-- فیلدهای `PATCH` را بدون تغییر نام مصرف کنید؛ هیچ تبدیل camelCase در سمت سرور انجام نمی‌شود.
+- `frontend/js/config.js` must set `API_BASE_URL` to `http://localhost:8000/api/v1`
+  (`PUBLIC_APP_BASE_URL` defaults to `http://localhost:5500`; CORS accepts that origin).
+- Keep the token in `sessionStorage` under the key `blood_access_token` and send an `X-Request-Id`
+  (a uuid built in the browser) so server logs and the UI stay correlatable.
+- Switch on `error.code`, never on the message text; messages may change.
+- `401` → send to login, `409` → show the state message, `429` → disable the button until `Retry-After` elapses.
+- Consume `PATCH` fields with their exact names; no camelCase conversion happens server-side.

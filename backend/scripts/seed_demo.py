@@ -24,16 +24,16 @@ from app.db.session import session_scope
 ADMIN_PHONE = "+989120000001"
 CENTERS = (
     {
-        "name": "مرکز اهدای خون نمونه - تهران",
-        "address": "تهران، خیابان نمونه، پلاک ۱",
+        "name": "Tehran Central Blood Center",
+        "address": "No. 1, Demo Avenue, Tehran",
         "latitude": Decimal("35.699700"),
         "longitude": Decimal("51.398300"),
         "phone": "+982122220001",
         "operator_phone": "+989120000002",
     },
     {
-        "name": "مرکز اهدای خون نمونه - کرج",
-        "address": "کرج، بلوار نمونه، پلاک ۲",
+        "name": "Karaj Central Blood Center",
+        "address": "No. 2, Demo Boulevard, Karaj",
         "latitude": Decimal("35.832000"),
         "longitude": Decimal("50.991000"),
         "phone": "+982122220002",
@@ -59,9 +59,9 @@ DONORS: tuple[tuple, ...] = (
 
 DEMO_REQUESTS = (
     {"center_index": 0, "component_type": "red_cells", "blood_group": "O", "rh_factor": "positive",
-     "units_needed": 3, "urgency": "urgent", "notes": "درخواست نمایشی - داده آزمایشی"},
+     "units_needed": 3, "urgency": "urgent", "notes": "Demo request - synthetic data"},
     {"center_index": 1, "component_type": "platelets", "blood_group": "A", "rh_factor": "positive",
-     "units_needed": 1, "urgency": "routine", "notes": "درخواست نمایشی - داده آزمایشی"},
+     "units_needed": 1, "urgency": "routine", "notes": "Demo request - synthetic data"},
 )
 
 
@@ -95,7 +95,7 @@ def seed() -> dict[str, int]:
                     phone=spec["phone"],
                     is_verified=True,
                     is_active=True,
-                    opening_hours="۲۴ ساعته",
+                    opening_hours="24 hours",
                     owner_user_id=operator.id,
                 )
                 session.add(center)

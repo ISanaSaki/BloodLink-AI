@@ -9,6 +9,6 @@ from app.schemas.user import UserOut
 router = APIRouter(prefix="/users", tags=["users"])
 
 
-@router.get("/me", summary="اطلاعات کاربر جاری")
+@router.get("/me", summary="Current user information")
 def read_current_user(user: CurrentUser) -> dict:
     return envelope(UserOut.model_validate(user).model_dump(mode="json"))

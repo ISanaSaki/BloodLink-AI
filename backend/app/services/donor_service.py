@@ -41,7 +41,7 @@ def apply_profile_patch(db: Session, profile: DonorProfile, payload: DonorProfil
 def set_location(db: Session, profile: DonorProfile, latitude: Decimal, longitude: Decimal) -> DonorLocation:
     if not profile.location_consent:
         raise Forbidden(
-            "برای ثبت موقعیت باید رضایت پردازش مکان فعال باشد.",
+            "Location processing consent must be enabled to save a location.",
         )
     location = profile.location or DonorLocation(donor_id=profile.id)
     location.latitude = latitude

@@ -82,7 +82,7 @@ class NotificationService:
         dispatchable = result.dispatchable
         if not dispatchable:
             raise Conflict(
-                "کاندیدای قابل فراخوان با داده تأییدشده یافت نشد.",
+                "No dispatchable candidate with verified data was found.",
                 details=[{"field": "candidates", "message": "empty"}],
             )
 
@@ -167,7 +167,7 @@ class NotificationService:
 
         center = self.db.get(BloodCenter, request.center_id)
         if center is None:
-            raise NotFound("مرکز این درخواست یافت نشد.")
+            raise NotFound("Centre not found for this request.")
 
         rows = self.db.scalars(
             select(Notification)
@@ -322,7 +322,7 @@ class NotificationService:
     def get_request(self, request_id: UUID) -> BloodRequest:
         request = self.db.get(BloodRequest, request_id)
         if request is None:
-            raise NotFound("درخواست خون یافت نشد.")
+            raise NotFound("Blood request not found.")
         return request
 
     def record_response(
@@ -337,12 +337,12 @@ class NotificationService:
         """Section 9.12: one final answer per notification, only by its own donor."""
         notification = self.db.get(Notification, notification_id)
         if notification is None:
-            raise NotFound("اعلان یافت نشد.")
+            raise NotFound("Notification not found.")
         if notification.donor_id != donor_id:
-            raise Forbidden("این اعلان برای داوطلب دیگری ارسال شده است.")
+            raise Forbidden("This notification was sent to a different donor.")
         if notification.response is not None:
             raise Conflict(
-                "برای این اعلان پاسخ نهایی ثبت شده است.",
+                "A final response has already been recorded for this notification.",
                 details=[{"field": "response", "message": "already_answered"}],
             )
 
