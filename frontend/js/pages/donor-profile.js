@@ -1,5 +1,6 @@
 import { api } from "../api-client.js";
 import { guard, initAppShell, updateUser } from "../auth.js";
+import { cacheDonorProfile, getCachedDonorProfile } from "../backend-state.js";
 import {
   bloodLabel,
   faDate,
@@ -23,6 +24,9 @@ async function init() {
   try {
     const { data } = await api.get("/users/me");
     me = data;
+    // The contract has no GET for the donor profile; restore the last saved values.
+    me.donor_profile = me.donor_profile ?? getCachedDonorProfile() ?? null;
+    cacheDonorProfile(me.donor_profile);
     updateUser(me);
     populate();
   } catch (error) {
@@ -135,6 +139,7 @@ form.addEventListener("submit", async (event) => {
   setButtonLoading(button, true, "در حال ذخیره…");
   try {
     const { data: updated } = await api.patch("/donors/me/profile", payload);
+    cacheDonorProfile(updated);
     me.donor_profile = { ...me.donor_profile, ...updated };
     updateUser({ donor_profile: me.donor_profile });
     renderSummary(me.donor_profile);

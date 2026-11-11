@@ -3,6 +3,7 @@ import { DEMO_OTP, TOKEN_KEY, USE_MOCK } from "../config.js";
 import {
   afterLogin,
   dashboardFor,
+  displayName,
   getDemoRole,
   getUser,
   isLoggedIn,
@@ -59,7 +60,7 @@ const sessionNote = document.querySelector("#session-note");
 if (sessionNote && isLoggedIn()) {
   const user = getUser();
   sessionNote.hidden = false;
-  sessionNote.querySelector("[data-session-name]").textContent = user.name;
+  sessionNote.querySelector("[data-session-name]").textContent = displayName(user);
   sessionNote.querySelector("[data-session-continue]").href = dashboardFor(user.role);
   sessionNote.querySelector("[data-session-switch]").addEventListener("click", () => {
     setToken(null);
@@ -255,12 +256,12 @@ verifyForm.addEventListener("submit", async (event) => {
   try {
     const { data } = await api.post(
       "/auth/otp/verify",
-      { phone: currentPhone, challenge_id: challengeId, code },
+      { phone: currentPhone, challenge_id: challengeId, code, purpose },
       { auth: false },
     );
     saveSession(data);
     clearInterval(timerId);
-    toast(`خوش آمدید ${data.user.name}`, { title: "ورود موفق" });
+    toast(`خوش آمدید ${displayName(data.user)}`, { title: "ورود موفق" });
     setTimeout(() => afterLogin(data.user), 500);
   } catch (error) {
     if (error instanceof ApiError && error.status === 401) {
@@ -268,6 +269,8 @@ verifyForm.addEventListener("submit", async (event) => {
       verifyButton.disabled = true;
       resendAt = 0;
       startTimer();
+    } else if (error instanceof ApiError && error.code === "RESOURCE_NOT_FOUND") {
+      showOtpError("حسابی با این شماره ثبت نشده است؛ برای ثبت‌نام داوطلب از صفحهٔ اصلی «ثبت‌نام داوطلب» را انتخاب کنید.");
     } else if (error instanceof ApiError && error.details?.some((item) => item.field === "code")) {
       showOtpError(error.details.find((item) => item.field === "code").message);
       resetOtp();

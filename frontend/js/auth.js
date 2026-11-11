@@ -1,6 +1,6 @@
 import { api, getToken, setToken } from "./api-client.js";
 import { TOKEN_KEY } from "./config.js";
-import { initials } from "./utils.js";
+import { formatPhoneForDisplay, initials } from "./utils.js";
 
 const USER_KEY = "blood_user";
 const DEMO_ROLE_KEY = "blood_demo_role";
@@ -84,15 +84,27 @@ export function afterLogin(user) {
   location.replace(PAGE(dashboardFor(user.role)));
 }
 
+export function displayName(user) {
+  return user?.name || formatPhoneForDisplay(user?.phone) || "کاربر";
+}
+
+function avatarLabel(user) {
+  if (user?.name) return initials(user.name);
+  const digits = String(user?.phone ?? "").replace(/\D/g, "");
+  if (!digits) return "؟";
+  const lastTwo = digits.slice(-2).replace(/\d/g, (d) => "۰۱۲۳۴۵۶۷۸۹"[Number(d)]);
+  return lastTwo;
+}
+
 export function initAppShell() {
   const user = getUser();
   if (!user) return null;
 
   document.querySelectorAll("[data-user-name]").forEach((el) => {
-    el.textContent = user.name || "کاربر";
+    el.textContent = displayName(user);
   });
   document.querySelectorAll("[data-user-avatar]").forEach((el) => {
-    el.textContent = initials(user.name);
+    el.textContent = avatarLabel(user);
   });
   document.querySelectorAll("[data-user-role]").forEach((el) => {
     el.textContent = user.role === "center_operator" ? "کارشناس مرکز اهدای خون" : "داوطلب اهدای خون";

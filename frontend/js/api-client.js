@@ -2,13 +2,14 @@ import { API_BASE_URL, USE_MOCK, TOKEN_KEY } from "./config.js";
 import { mockRequest, MockApiError } from "./mock-api.js";
 
 export class ApiError extends Error {
-  constructor(message, { code = "NETWORK_ERROR", status = 0, details = [], requestId = "" } = {}) {
+  constructor(message, { code = "NETWORK_ERROR", status = 0, details = [], requestId = "", retryAfter = 0 } = {}) {
     super(message);
     this.name = "ApiError";
     this.code = code;
     this.status = status;
     this.details = details;
     this.requestId = requestId;
+    this.retryAfter = retryAfter;
   }
 }
 
@@ -69,6 +70,7 @@ export async function apiRequest(path, { method = "GET", body, auth = true, sign
       signal,
       headers: {
         Accept: "application/json",
+        "X-Request-Id": crypto.randomUUID(),
         ...(body ? { "Content-Type": "application/json" } : {}),
         ...(auth && token ? { Authorization: `Bearer ${token}` } : {}),
       },
@@ -85,11 +87,13 @@ export async function apiRequest(path, { method = "GET", body, auth = true, sign
 
   if (!response.ok || payload?.error) {
     const apiError = payload?.error ?? {};
+    const retryAfter = Number(response.headers.get("Retry-After"));
     throw new ApiError(apiError.message || "خطایی در پردازش درخواست رخ داد.", {
       code: apiError.code || `HTTP_${response.status}`,
       status: response.status,
       details: apiError.details || [],
       requestId: apiError.request_id || "",
+      retryAfter: Number.isFinite(retryAfter) ? retryAfter : 0,
     });
   }
 

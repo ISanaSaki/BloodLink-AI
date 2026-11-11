@@ -1,5 +1,6 @@
 import { api } from "../api-client.js";
 import { guard, initAppShell, updateUser } from "../auth.js";
+import { fetchManagedCenter, getDispatchState, markDispatched } from "../backend-state.js";
 import {
   bloodLabel,
   componentMeta,
@@ -61,16 +62,48 @@ async function load({ silent = false } = {}) {
   try {
     const meResponse = await api.get("/users/me");
     const requestResponse = await api.get("/blood-requests?page_size=100");
-    const me = meResponse.data;
-    center = me.center ?? null;
-    updateUser(me);
+    updateUser(meResponse.data);
+    center = await fetchManagedCenter();
     requests = requestResponse.data ?? [];
+    requests.forEach((request) => {
+      const dispatch = getDispatchState(request.id);
+      if (dispatch) {
+        request.dispatch_id = dispatch.dispatch_id;
+        request.dispatched_at = dispatch.dispatched_at;
+      }
+    });
     renderCenter();
     renderMetrics();
     renderRequests();
+    loadRequestStats();
   } catch (error) {
     renderError(error);
   }
+}
+
+// The list endpoint carries no counters; ask each active request for its
+// responses and candidate totals so the metrics and cards stay accurate.
+async function loadRequestStats() {
+  const active = requests.filter((request) => request.status === "active");
+  await Promise.all(
+    active.map(async (request) => {
+      try {
+        const [responsesResponse, candidatesResponse] = await Promise.all([
+          api.get(`/blood-requests/${request.id}/responses?page_size=100`),
+          api.get(`/blood-requests/${request.id}/candidates?page_size=100`),
+        ]);
+        request.interested_count = (responsesResponse.data ?? []).filter(
+          (item) => item.response === "interested",
+        ).length;
+        request.candidates_count =
+          candidatesResponse.meta?.total ?? (candidatesResponse.data ?? []).length;
+      } catch {
+        /* a non-dispatchable request has no candidate list; keep zero */
+      }
+    }),
+  );
+  renderMetrics();
+  renderRequests();
 }
 
 function renderCenter() {
@@ -413,12 +446,12 @@ function renderCandidates(candidates, request) {
 
   candidatesEmpty.hidden = true;
   candidatesBody.innerHTML = candidates
-    .map((candidate) => {
+    .map((candidate, index) => {
       const verified = candidate.eligibility_check_status === "verified_data";
-      const firstBatch = candidate.dispatch_stage === "first_batch";
+      const firstBatch = candidate.dispatch_stage === 1;
       return `
         <tr>
-          <td><span class="rank-badge">${faNum(candidate.rank)}</span></td>
+          <td><span class="rank-badge">${faNum(index + 1)}</span></td>
           <td>
             <span class="donor-ref">
               <span class="avatar avatar--sm avatar--ink"><svg class="icon" aria-hidden="true"><use href="../assets/icons/sprite.svg#i-user"></use></svg></span>
@@ -543,11 +576,10 @@ async function executeAction() {
       const response = await api.post(`/blood-requests/${id}/dispatch`);
       const data = response.data;
       if (request) {
+        markDispatched(id, data.dispatch_id);
         request.dispatch_id = data.dispatch_id;
         request.dispatched_at = new Date().toISOString();
-        request.candidate_count = data.candidate_count;
         request.candidates_count = data.candidate_count;
-        request.first_batch_size = data.first_batch_size;
       }
       toast(
         `فراخوان برای ${faNum(data.candidate_count)} داوطلب در صف قرار گرفت؛ ${faNum(data.first_batch_size)} نفر اول فوراً پیام می‌گیرند.`,
