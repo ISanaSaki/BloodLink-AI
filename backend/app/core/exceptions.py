@@ -25,14 +25,14 @@ class ErrorCode:
 
 
 DEFAULT_MESSAGES: dict[str, str] = {
-    ErrorCode.INVALID_REQUEST: "درخواست نامعتبر است.",
-    ErrorCode.UNAUTHENTICATED: "برای این عملیات باید وارد شوید.",
-    ErrorCode.FORBIDDEN: "دسترسی کافی برای این عملیات ندارید.",
-    ErrorCode.RESOURCE_NOT_FOUND: "منبع مورد نظر یافت نشد.",
-    ErrorCode.CONFLICT: "وضعیت فعلی منبع اجازه این عملیات را نمی‌دهد.",
-    ErrorCode.VALIDATION_ERROR: "اطلاعات ورودی معتبر نیست.",
-    ErrorCode.RATE_LIMITED: "تعداد درخواست‌ها بیش از حد مجاز است. کمی بعد تلاش کنید.",
-    ErrorCode.INTERNAL_ERROR: "خطای داخلی رخ داد. با شناسه درخواست پیگیری کنید.",
+    ErrorCode.INVALID_REQUEST: "The request is invalid.",
+    ErrorCode.UNAUTHENTICATED: "You must sign in to perform this operation.",
+    ErrorCode.FORBIDDEN: "You do not have permission for this operation.",
+    ErrorCode.RESOURCE_NOT_FOUND: "The requested resource was not found.",
+    ErrorCode.CONFLICT: "The current state of the resource does not allow this operation.",
+    ErrorCode.VALIDATION_ERROR: "The input is not valid.",
+    ErrorCode.RATE_LIMITED: "Too many requests. Please try again later.",
+    ErrorCode.INTERNAL_ERROR: "An internal error occurred. Reference the request ID when reporting it.",
 }
 
 
@@ -47,7 +47,7 @@ class AppError(Exception):
     ) -> None:
         self.status_code = status_code
         self.code = code
-        self.message = message or DEFAULT_MESSAGES.get(code, "خطای ناشناخته.")
+        self.message = message or DEFAULT_MESSAGES.get(code, "Unknown error.")
         self.details = details
         self.headers = headers or {}
         super().__init__(f"{code}: {self.message}")
