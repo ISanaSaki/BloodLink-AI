@@ -1,35 +1,44 @@
-# ۰۰۰۵ — دامنه این پیاده‌سازی و نقطه اتصال هم‌تیمی‌ها
+# 0005 — Scope of this implementation and the teammates' integration point
 
-- وضعیت: پذیرفته‌شده (۲۰۲۶-۱۱-۰۴) — مالک: ثنا
-- زمینه: تیکت دامنه را «فقط سهم ثنا (Backend Lead)» تعیین کرد. سهم اسرا و شقایق قرارداد‌محور است و
-  باید روی همین پایه سوار شود، نه اینکه همین فایل‌ها بازنویسی شوند.
-- تصمیم — آنچه **پیاده‌سازی شده** (همه با تست روی PostgreSQL واقعی):
+- Status: accepted (2026-11-04) — Owner: Sana
+- Context: the ticket defined the scope as "only Sana's share (Backend Lead)". Asra's and
+  Shaghayeq's shares are contract-driven and must sit on top of this base, not rewrite these same
+  files.
+- Decision — what is **implemented** (all tested on real PostgreSQL):
 
-| ماژول | فایل‌ها | تست |
+| Module | Files | Tests |
 | --- | --- | --- |
-| config/security/exceptions/logging/context/dependencies | `app/core/*` | در همه تست‌ها |
-| مدل‌ها + مهاجرت | `app/db/models/*`, `alembic/versions/*` | `alembic check`، `test_state_machines.py` |
-| Auth OTP + توکن | `services/otp_service.py`, `api/v1/endpoints/auth.py` | `test_auth_otp.py` |
-| خودخدمات داوطلب | `services/donor_service.py`, `endpoints/donor_profile.py`, `endpoints/donor_location.py` | `test_donor_self_service.py` |
+| config/security/exceptions/logging/context/dependencies | `app/core/*` | across all tests |
+| Models + migrations | `app/db/models/*`, `alembic/versions/*` | `alembic check`, `test_state_machines.py` |
+| Auth OTP + token | `services/otp_service.py`, `api/v1/endpoints/auth.py` | `test_auth_otp.py` |
+| Donor self-service | `services/donor_service.py`, `endpoints/donor_profile.py`, `endpoints/donor_location.py` | `test_donor_self_service.py` |
 | Matching | `services/matching_service.py` | `test_matching_service.py` |
-| Dispatch + پاسخ | `services/notification_service.py`, `endpoints/dispatch.py`, `endpoints/notifications.py` | `test_dispatch.py`, `test_notifications_api.py` |
-| Adapter پیامک/نقشه | `services/sms_service.py`, `services/maps_service.py` | `test_matching_service.py`, `test_dispatch.py` |
+| Dispatch + response | `services/notification_service.py`, `endpoints/dispatch.py`, `endpoints/notifications.py` | `test_dispatch.py`, `test_notifications_api.py` |
+| SMS/maps adapters | `services/sms_service.py`, `services/maps_service.py` | `test_matching_service.py`, `test_dispatch.py` |
 | Celery + Beat | `tasks/celery_app.py`, `tasks/notification_tasks.py` | `test_dispatch.py`, `test_state_machines.py` |
-| قرارداد API | `schemas/*`, `main.py` | `test_api_contract.py` |
-| داده نمایشی | `scripts/seed_demo.py` | `test_seed_demo.py` |
+| API contract | `schemas/*`, `main.py` | `test_api_contract.py` |
+| Demo data | `scripts/seed_demo.py` | `test_seed_demo.py` |
 
-- آنچه **عمداً ساخته نشده** (مالک: اسرا):
-  - `api/v1/endpoints/centers.py` — `GET /centers`، `GET/PATCH /centers/{id}`، `POST /centers` (admin).
+- What was **built by Asra** (PR #1, merged 2026-11-10):
+  - `api/v1/endpoints/centers.py` — `GET /centers`, `GET/PATCH /centers/{id}`, `POST /centers`
+    (admin).
   - `api/v1/endpoints/blood_requests.py` — Create/List/Detail/PATCH(draft)/activate/cancel/responses.
   - `api/v1/endpoints/donor_availability.py` — `PATCH /donors/me/availability`.
-  - ثبت سه router در `api/v1/router.py` (بلاک کامنت‌شده همان‌جاست؛ فقط ۴ خط باز می‌شود، تضاد Git ندارد).
-  - مالک: شقایق — کل `frontend/**`، از جمله `pages/respond.html` که لینک `?token=` پیامک را مصرف می‌کند.
-- قرارداد اتصال (برای اینکه موازی کار کنیم بدون شکستن تست‌ها):
-  1. فایل‌های `app/core/*` و `app/services/*` و `app/tasks/*` را فقط ثنا تغییر دهد (بخش ۴ سند).
-  2. برای endpoint جدید: schema در `app/schemas/`، تست در `app/tests/`، و یک بخش در `docs/API_CONTRACT.md` در همان PR.
-  3. تغییر مدل → Migration + `alembic check` سبز + به‌روزرسانی `docs/ERD.md`.
-  4. `donor_availability` روی جدول موجود می‌نویسد؛Matching همان `DonorAvailability.is_available_at` را می‌خواند،
-     پس منطق آمادگی را duplicate نکنید.
-  5. برای `activate` از `BloodRequest.transition_to(ACTIVE)` استفاده کنید (ماشین‌وضعیت + `activated_at` رایگان می‌آید).
-- پیامد: دمو بدون کد اسرا قابل اجراست (seed + dispatch + پاسخ داوطلب)؛ اما جریان کامل «اپراتور درخواست می‌سازد»
-  تا ثبت آن endpointها از طریق API بسته است. برای دمو می‌توان از `scripts/seed_demo.py` و تغییر وضعیت در DB استفاده کرد.
+  - The three routers are registered in `api/v1/router.py`; `docs/API_CONTRACT.md` documents the
+    endpoints (sections 6-7). The PR arrived without tests and with two issues the merge fixed:
+    a missing `AvailabilityStatus` import in `donor_availability.py` (NameError at runtime) and
+    Persian endpoint messages (the repo is now fully English).
+  - Owner: Shaghayeq — all of `frontend/**`, including `pages/respond.html` which consumes the
+    `?token=` link of the SMS.
+- Integration contract (so we can work in parallel without breaking tests):
+  1. Only Sana changes the `app/core/*`, `app/services/*` and `app/tasks/*` files (document
+     section 4).
+  2. For a new endpoint: a schema in `app/schemas/`, a test in `app/tests/`, and a section in
+     `docs/API_CONTRACT.md` in the same PR.
+  3. Model change → Migration + green `alembic check` + `docs/ERD.md` update.
+  4. `donor_availability` writes to the existing table; Matching reads the same
+     `DonorAvailability.is_available_at`, so don't duplicate the availability logic.
+  5. For `activate` use `BloodRequest.transition_to(ACTIVE)` (the state machine + `activated_at`
+     come for free).
+- Consequences: the full "operator creates a request" flow is now open through the API
+  (PR #1). Asra's endpoints still need their own test coverage (integration contract item 2).

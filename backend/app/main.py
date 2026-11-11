@@ -13,10 +13,10 @@ configure_logging()
 logger = get_logger(__name__)
 
 DESCRIPTION = """
-سامانه هوشمند فراخوان و مسیریابی داوطلبان اهدای خون — MVP مسابقه‌ای با داده آزمایشی.
+Smart blood-donation call-out and donor routing system — competition MVP on synthetic data.
 
-همه پاسخ‌ها از پوشش `{ data, meta }` و خطاها از `{ error }` استفاده می‌کنند؛
-نام فیلدها دقیقاً snake_case است. قواعد کامل در `docs/API_CONTRACT.md` آمده است.
+Every response uses the `{ data, meta }` envelope and every error uses `{ error }`;
+field names are exactly snake_case. Full rules live in `docs/API_CONTRACT.md`.
 """
 
 app = FastAPI(

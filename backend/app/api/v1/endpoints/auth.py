@@ -41,7 +41,7 @@ def _client_ip(request: Request) -> str:
     return request.client.host if request.client else "unknown"
 
 
-@router.post("/otp/request", status_code=status.HTTP_202_ACCEPTED, summary="درخواست کد OTP")
+@router.post("/otp/request", status_code=status.HTTP_202_ACCEPTED, summary="Request an OTP code")
 def request_otp(
     payload: OtpRequestIn,
     request: Request,
@@ -66,7 +66,7 @@ def request_otp(
     )
 
 
-@router.post("/otp/verify", summary="تأیید کد OTP و دریافت توکن")
+@router.post("/otp/verify", summary="Verify an OTP code and get a token")
 def verify_otp(payload: OtpVerifyIn, store: OtpStore, db: DatabaseSession) -> dict:
     OtpService(store).verify(payload.challenge_id, payload.phone, payload.code, payload.purpose)
     user, created = get_or_create_user(db, payload.phone, payload.purpose)

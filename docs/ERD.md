@@ -1,8 +1,8 @@
-# ERD — مدل داده اجراشده
+# ERD — Implemented Data Model
 
-منبع حقیقت: `backend/app/db/models/*.py` + مهاجرت‌های Alembic (هد فعلی: `10dc83a66c29`).
-این فایل با `alembic revision --autogenerate`ها به‌روز می‌ماند؛ هر تغییر مدل باید
-هم Migration، هم این سند، هم `docs/decisions/` را به‌روز کند (بخش ۴ و ۲۰ سند تیمی).
+Source of truth: `backend/app/db/models/*.py` + Alembic migrations (current head: `10dc83a66c29`).
+This file is kept up to date with every `alembic revision --autogenerate`; each model change must update
+the Migration, this document, and `docs/decisions/` (team document sections 4 and 20).
 
 ```mermaid
 erDiagram
@@ -30,8 +30,8 @@ erDiagram
         uuid user_id FK_UK
         varchar blood_group "A | B | AB | O | null"
         varchar rh_factor "positive | negative | null"
-        boolean blood_type_verified "فقط مرجع مجاز"
-        date last_donation_date "خوداظهاری تا تأیید"
+        boolean blood_type_verified "authorized source only"
+        date last_donation_date "self-declared until verified"
         boolean sms_consent
         boolean location_consent
     }
@@ -58,8 +58,8 @@ erDiagram
         varchar phone
         boolean is_verified
         boolean is_active
-        varchar opening_hours "+اضافه"
-        uuid owner_user_id "+اضافه"
+        varchar opening_hours "+added"
+        uuid owner_user_id "+added"
     }
     BLOOD_REQUESTS {
         uuid id PK
@@ -72,8 +72,8 @@ erDiagram
         varchar status "draft | active | fulfilled | cancelled | expired"
         timestamptz expires_at
         uuid created_by FK
-        text notes "+اضافه (داخلی، هرگز در پیامک)"
-        timestamptz activated_at "+اضافه"
+        text notes "+added (internal, never in SMS)"
+        timestamptz activated_at "+added"
     }
     NOTIFICATIONS {
         uuid id PK
@@ -83,17 +83,17 @@ erDiagram
         varchar status "queued | sent | delivered | failed | cancelled"
         varchar idempotency_key UK "sms:{request}:{donor}:b{batch}"
         varchar provider_message_id
-        integer batch_number "+اضافه (مرحله فراخوان)"
-        integer retry_count "+اضافه"
-        text failure_reason "+اضافه"
-        varchar response_token UK "+اضافه (لینک امن پاسخ)"
+        integer batch_number "+added (dispatch stage)"
+        integer retry_count "+added"
+        text failure_reason "+added"
+        varchar response_token UK "+added (secure response link)"
     }
     DONOR_RESPONSES {
         uuid id PK
         uuid notification_id FK_UK
         varchar response "interested | unavailable"
         timestamptz responded_at
-        integer eta_minutes "+اضافه"
+        integer eta_minutes "+added"
     }
     AUDIT_LOGS {
         uuid id PK
@@ -101,31 +101,36 @@ erDiagram
         uuid actor_id FK_null "SET NULL on delete"
         varchar action "60"
         varchar entity_type "40"
-        varchar entity_id "64 (uuid رشته‌ای)"
-        json details "redact شده"
+        varchar entity_id "64 (uuid as string)"
+        json details "redacted"
         varchar request_id "36"
         text comment
     }
 ```
 
-## قواعد یکپارچگی اجراشده
+## Implemented integrity rules
 
-- کلید اصلی همه جداول UUID است (استثنایی ندارد؛ جداول رابطی هم UUID دارند و فقط uniqueness را حفظ می‌کنند).
-- enum‌ها به‌صورت `VARCHAR + CHECK` ذخیره می‌شوند (`native_enum=False`) تا افزودن مقدار جدید
-  نیازمند مهاجرت سنگین PostgreSQL نباشد؛ قید `create_constraint=True` مقدار نامعتبر را در دیتابیس هم رد می‌کند.
-- نام‌گذاری قیدها از `NAMING_CONVENTION` در `app/db/base.py` می‌آید: `ix_`, `uq_`, `ck_`, `fk_`, `pk_`.
-  همین نام‌ها باعث می‌شود `alembic --autogenerate` تغییر مبهم نسازد.
-- `notifications.idempotency_key` و `donor_responses.notification_id` منحصربه‌فردند:
-  DSP-03 و «یک پاسخ نهایی برای هر اعلان» در دیتابیس تضمین می‌شود، نه فقط در کد.
-- `ondelete`: برای `request_id`/`donor_id` در `notifications` و برای `notification_id` در `donor_responses`
-  مقدار `CASCADE` است، `blood_requests.center_id` با `RESTRICT` محافظت می‌شود (حذف مرکز با درخواست باز مجاز نیست)
-  و `audit_logs.actor_id` روی `SET NULL` می‌رود تا سوابق با حذف کاربر از بین نروند.
-- یکپارچگی معنایی در مدل است نه DB: `BloodRequest.transition_to` و `Notification.transition_to`
-  ماشین‌وضعیت بخش ۱۵ را اعمال و در صورت انتقال غیرمجاز `409 CONFLICT` می‌دهند.
+- Every table uses a UUID primary key (no exceptions; junction tables also have UUIDs and only
+  preserve uniqueness).
+- Enums are stored as `VARCHAR + CHECK` (`native_enum=False`) so adding a new value does not
+  require a heavy PostgreSQL migration; the `create_constraint=True` constraint also rejects
+  invalid values at the database level.
+- Constraint names come from the `NAMING_CONVENTION` in `app/db/base.py`: `ix_`, `uq_`, `ck_`,
+  `fk_`, `pk_`. These names keep `alembic --autogenerate` from producing ambiguous changes.
+- `notifications.idempotency_key` and `donor_responses.notification_id` are unique:
+  DSP-03 and "one final response per notification" are guaranteed in the database, not only in code.
+- `ondelete`: `request_id`/`donor_id` in `notifications` and `notification_id` in `donor_responses`
+  use `CASCADE`; `blood_requests.center_id` is protected with `RESTRICT` (a centre with open
+  requests cannot be deleted) and `audit_logs.actor_id` uses `SET NULL` so records survive user
+  deletion.
+- Semantic integrity lives in the model, not the DB: `BloodRequest.transition_to` and
+  `Notification.transition_to` enforce the state machine from section 15 and return
+  `409 CONFLICT` on an illegal transition.
 
-## یادداشت پزشکی (محدوده‌ای که هرگز خودسرانه کدگذاری نمی‌شود)
+## Medical note (a boundary that is never coded unilaterally)
 
-`blood_group`/`rh_factor`/`component_type` فقط «نوع اعلامی» مرکز و «داده تأییدشده» داوطلب را نگه می‌دارند.
-هیچ سازگاری بالینی، قواعد فاصله بین اهدا یا مجوز پزشکی از سمت تیم ساخته نمی‌شود؛
-`DemoDeclaredTypePolicy` فقط تطابق اعلامی را برای دمو بررسی می‌کند و برچسب `demo` می‌خورد
-(تصمیم ۰۰۰۲). منبع رسمی قواعد باید توسط مرکز/سازمان انتقال خون تعیین شود.
+`blood_group`/`rh_factor`/`component_type` only store the centre's "declared type" and the donor's
+"verified data". No clinical compatibility, donation-interval, or medical-eligibility rules are
+built by the team; `DemoDeclaredTypePolicy` only checks declared-type matching for the demo and is
+labelled `demo` (decision 0002). The official source of the rules must be set by the blood centre /
+blood transfusion organization.

@@ -43,7 +43,7 @@ def _to_out(notification: Notification) -> NotificationOut:
     )
 
 
-@router.get("", summary="اعلان‌های داوطلب جاری")
+@router.get("", summary="List the donor's current notifications")
 def list_donor_notifications(
     user: DonorUser,
     db: DatabaseSession,
@@ -74,7 +74,7 @@ def list_donor_notifications(
 @router.post(
     "/{notification_id}/response",
     status_code=status.HTTP_201_CREATED,
-    summary="ثبت پاسخ داوطلب به فراخوان",
+    summary="Record the donor's response to a call",
 )
 def respond_to_notification(
     notification_id: UUID,

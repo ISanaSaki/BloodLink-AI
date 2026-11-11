@@ -229,7 +229,7 @@ def test_notification_payload_leaks_no_private_donor_or_center_data(
 
     listing = client.get(f"{PREFIX}/notifications", headers=auth_headers(donor.user_id, "donor"))
     body = listing.text
-    assert "یادداشت داخلی مرکز" not in body
+    assert "Centre internal note" not in body
     assert donor.user.phone not in body
     assert "latitude" not in body
     assert "response_token" not in body

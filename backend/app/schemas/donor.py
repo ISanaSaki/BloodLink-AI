@@ -25,7 +25,7 @@ class DonorProfilePatch(BaseModel):
     @model_validator(mode="after")
     def _at_least_one_field(self) -> Self:
         if not self.model_dump(exclude_unset=True):
-            raise ValueError("حداقل یک فیلد برای ویرایش ارسال کنید.")
+            raise ValueError("Send at least one field to edit.")
         return self
 
 

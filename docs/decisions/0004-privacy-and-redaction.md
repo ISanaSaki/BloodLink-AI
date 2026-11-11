@@ -1,32 +1,40 @@
-# ۰۰۰۴ — حریم خصوصی: ماسک، هش و حذف؛ نه «فقط نمایش»
+# 0004 — Privacy: mask, hash and delete; not just "hide in the UI"
 
-- وضعیت: پذیرفته‌شده (۲۰۲۶-۱۱-۰۴) — مالک: ثنا
-- زمینه: بخش ۱۴ سند می‌گوید شماره تماس، کد OTP، توکن و موقعیت دقیق هرگز نباید در لاگ یا پاسخ‌های غیرضروری ظاهر شود،
-  و بخش ۱.۲ ذخیره موقعیت بدون رضایت صریح را ممنوع می‌کند. این قاعده با «در UI نشان نده» تضمین نمی‌شود؛
-  باید در لایه ذخیره، لاگ و قرارداد API اعمال شود.
-- تصمیم (هر یک یک مکانیزم کد + یک تست دارد):
-  1. **OTP**: فقط `hash_otp(code)` (HMAC-SHA256 با `SECRET_KEY`) ذخیره می‌شود؛ مقایسه با
-     `hmac.compare_digest`. کد خام هیچ‌جا نوشته نمی‌شود (تست: `test_auth_otp.py`).
-  2. **Rate-limit keys**: کلیدهای شمارش شماره/IP به‌صورت HMAC کوتاه‌شده ساخته می‌شوند (`_rate_key`)،
-     پس شماره خام حتی به‌عنوان کلید Redis هم باقی نمی‌ماند.
-  3. **Logging**: `app/core/logging.py::redact` مقادیر کلیدهای حساس
-     (`otp, code, token, access_token, authorization, password, phone, secret`) را حذف می‌کند و
-     `mask_phone` شماره را به `+989***567` تبدیل می‌کند. لاگ‌های پیامک فقط provider/status را دارند.
-  4. **Audit**: `AuditService.record` همان `redact` را قبل از ذخیره `details` اعمال و `request_id` را می‌چسباند.
-  5. **پنل مرکز**: `donor_reference` یک HMAC ۱۲-hex با `SECRET_KEY` است؛ نه شماره، نه نام، نه مختصات.
-     `GET /candidates` هرگز `latitude/longitude/phone` برنمی‌گرداند (تست: `test_dispatch.py::test_candidates_endpoint_hides_donor_pii`).
-  6. **لغو رضایت مکان**: `apply_profile_patch` با `location_consent=false` رکورد `donor_locations` را **حذف** می‌کند،
-     نه اینکه فقط flag را عوض کند.
-  7. **Notes مرکز** (`blood_requests.notes`) فقط در endpointهای مرکز است و در پیامک/`/notifications`/`/candidates` ظاهر نمی‌شود.
-  8. **Token پاسخ داوطلب**: `notifications.response_token` یک مقدار تصادفی یک‌بارمصرف است؛ فقط مسیر پاسخ را باز می‌کند
-     و هیچ دسترسی دیگری نمی‌دهد. در هیچ پاسخ JSON برنمی‌گردد.
-  9. **OTP هرگز از broker رد نمی‌شود**: ارسال پیامک کد، inline در مسیر درخواست است (`_send_otp_sms` در
-     `endpoints/auth.py`). تسک Celery داشتیم، اما آرگومان تسک در Redis ذخیره می‌شود؛ یعنی کد یک‌بارمصرف و
-     شماره تماس در صف/بروکر می‌نشستند. تسک‌های باقی‌مانده فقط `request_id`/`batch_number` می‌برند.
- 10. **صندوق پیام دمو**: `SMS_DEV_OUTBOX_FILE` (فقط development) متن پیامک را در یک فایل gitignore شده می‌نویسد
-     تا کد OTP و لینک پاسخ در دمو قابل خواندن باشند؛ این جایگزین لاگ نیست و در production توسط Settings رد می‌شود.
-- پیامد:
-  - برای درگاه واقعی، لاگ‌ها باید همان `get_logger` را استفاده کنند؛ لاگ مستقیم `print` یا logger سفارشی ممنوع است.
-  - اسرا در `GET /blood-requests/{id}/responses` باید از `donor_reference` استفاده کند، نه شماره تماس؛
-    نمایش تماس مستقیم فقط با مجوز صریح و در نقش مرکز (بخش ۹.۱۳) و پس از ثبت تصمیم جدید مجاز است.
-  - اگر روزی نیاز به دیباگ شماره شد، از `mask_phone` استفاده کنید و تصمیم را در همین پوشه ثبت کنید.
+- Status: accepted (2026-11-04) — Owner: Sana
+- Context: document section 14 says phone numbers, OTP codes, tokens and exact locations must never
+  appear in logs or unnecessary responses, and section 1.2 forbids storing a location without
+  explicit consent. "Don't show it in the UI" does not guarantee this rule; it must be enforced in
+  the storage layer, the logs and the API contract.
+- Decision (each item has one code mechanism + one test):
+  1. **OTP**: only `hash_otp(code)` (HMAC-SHA256 with `SECRET_KEY`) is stored; comparison uses
+     `hmac.compare_digest`. The raw code is never written anywhere (test: `test_auth_otp.py`).
+  2. **Rate-limit keys**: the phone/IP counting keys are built as truncated HMACs (`_rate_key`), so
+     the raw phone never remains even as a Redis key.
+  3. **Logging**: `app/core/logging.py::redact` removes values of sensitive keys
+     (`otp, code, token, access_token, authorization, password, phone, secret`) and `mask_phone`
+     turns a number into `+989***567`. SMS logs carry only provider/status.
+  4. **Audit**: `AuditService.record` applies the same `redact` before storing `details` and
+     attaches the `request_id`.
+  5. **Centre panel**: `donor_reference` is a 12-hex HMAC with `SECRET_KEY`; no number, name or
+     coordinates. `GET /candidates` never returns `latitude/longitude/phone` (test:
+     `test_dispatch.py::test_candidates_endpoint_hides_donor_pii`).
+  6. **Revoking location consent**: `apply_profile_patch` with `location_consent=false` **deletes**
+     the `donor_locations` record instead of only flipping a flag.
+  7. **Centre notes** (`blood_requests.notes`) exist only in centre endpoints and never appear in
+     SMS/`/notifications`/`/candidates`.
+  8. **Donor response token**: `notifications.response_token` is a random one-time value; it only
+     opens the response path and grants no other access. It is never returned in any JSON response.
+  9. **The OTP never passes through the broker**: sending the code SMS is inline in the request path
+     (`_send_otp_sms` in `endpoints/auth.py`). We had a Celery task, but task arguments are stored in
+     Redis; that would put the one-time code and the phone number in the queue/broker. The remaining
+     tasks carry only `request_id`/`batch_number`.
+ 10. **Demo message outbox**: `SMS_DEV_OUTBOX_FILE` (development only) writes the SMS text to a
+     gitignored file so the OTP code and the response link stay readable in the demo; this is not a
+     substitute for logs and Settings rejects it in production.
+- Consequences:
+  - For a real gateway, logs must use the same `get_logger`; direct `print` or a custom logger is
+    forbidden.
+  - In `GET /blood-requests/{id}/responses`, Asra must use `donor_reference`, not the phone number;
+    showing the direct contact is allowed only with explicit permission in the centre role
+    (section 9.13) and after a new decision is recorded.
+  - If a number ever needs debugging, use `mask_phone` and record the decision in this folder.

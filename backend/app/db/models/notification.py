@@ -71,7 +71,7 @@ class Notification(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     def transition_to(self, target: NotificationStatus) -> None:
         if target not in TRANSITIONS[self.status]:
             raise Conflict(
-                f"انتقال وضعیت اعلان از {self.status.value} به {target.value} مجاز نیست.",
+                f"Transitioning the notification from {self.status.value} to {target.value} is not allowed.",
                 details=[{"field": "status", "message": f"{self.status.value} -> {target.value}"}],
             )
         self.status = target
