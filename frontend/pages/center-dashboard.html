@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>داشبورد مرکز اهدای خون | هم‌خون</title>
+  <meta name="description" content="مدیریت درخواست‌های خون، فراخوان داوطلبان و پیگیری پاسخ‌ها در پنل مرکز اهدای خون هم‌خون." />
+  <meta name="theme-color" content="#f7f4ec" />
+  <link rel="icon" href="../assets/icons/favicon.svg" type="image/svg+xml" />
+  <link rel="preload" href="../assets/fonts/Vazirmatn-Variable.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="stylesheet" href="../css/base.css" />
+  <link rel="stylesheet" href="../css/components.css" />
+  <link rel="stylesheet" href="../css/app.css" />
+  <script>document.documentElement.classList.add("js");</script>
+  <script type="module" src="../js/pages/center-dashboard.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">پرش به محتوای اصلی</a>
+
+  <header class="app-head">
+    <div class="app-head__inner">
+      <a class="brand" href="../index.html" aria-label="هم‌خون، صفحه اصلی">
+        <svg class="brand__mark" viewBox="0 0 64 64" aria-hidden="true">
+          <rect width="64" height="64" rx="20" fill="none"/>
+          <path d="M32 12c0 0-13 11.2-13 20.2a13 13 0 0 0 26 0C45 23.2 32 12 32 12Z" fill="none" stroke="currentColor" stroke-width="2.6"/>
+          <path d="M32 40c-3.9-3-6-5.3-6-7.7a3.6 3.6 0 0 1 6-2.5 3.6 3.6 0 0 1 6 2.5c0 2.4-2.1 4.7-6 7.7Z" fill="#D9584C"/>
+        </svg>
+        <span>
+          <span class="brand__name">هم‌خون</span>
+          <span class="brand__sub">پنل مرکز اهدای خون</span>
+        </span>
+      </a>
+
+      <nav class="app-nav" aria-label="منوی پنل">
+        <a class="is-active" href="center-dashboard.html">
+          <svg class="icon" aria-hidden="true"><use href="../assets/icons/sprite.svg#i-home"></use></svg>
+          <span>داشبورد</span>
+        </a>
+        <a href="#requests">
+          <svg class="icon" aria-hidden="true"><use href="../assets/icons/sprite.svg#i-drop"></use></svg>
+          <span>درخواست‌ها</span>
+        </a>
+        <a href="blood-request-form.html">
+          <svg class="icon" aria-hidden="true"><use href="../assets/icons/sprite.svg#i-plus"></use></svg>
+          <span>ثبت درخواست</span>
+        </a>
+      </nav>
+
+      <div class="app-head__actions">
+        <a class="bell-btn" href="#requests" aria-label="درخواست‌های در جریان">
+          <svg class="icon" aria-hidden="true"><use href="../assets/icons/sprite.svg#i-bell"></use></svg>
+          <span class="bell-btn__dot" data-bell-dot hidden></span>
+        </a>
+        <span class="user-chip">
+          <span class="avatar avatar--sm avatar--ink" data-user-avatar>ا</span>
+          <span class="user-chip__text">
+            <span class="user-chip__name" data-user-name>امیر رضایی</span>
+            <span class="user-chip__role" data-user-role>کارشناس مرکز اهدای خون</span>
+          </span>
+        </span>
+        <button class="icon-btn logout-btn" type="button" data-logout aria-label="خروج از حساب">
+          <svg class="icon" aria-hidden="true"><use href="../assets/icons/sprite.svg#i-logout"></use></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="app-main" id="main">
+    <div class="container">
+      <div class="page-head">
+        <div class="page-head__text">
+          <span class="eyebrow">
+            پنل مرکز اهدای خون
+            <span class="demo-pill"><svg class="icon" aria-hidden="true"><use href="../assets/icons/sprite.svg#i-spark"></use></svg> نسخه نمایشی</span>
+          </span>
+          <h1>سلام <span data-user-name>امیر رضایی</span>، نبض مرکز دست شماست.</h1>
+          <p><span data-center-name>مرکز اهدای خون وصال شیراز</span> · درخواست‌ها، فراخوان داوطلبان و پاسخ‌ها را از همین‌جا مدیریت کنید. ارزیابی نهایی سلامت داوطلب همچنان با پزشک مرکز است.</p>
+        </div>
+        <div class="page-head__actions">
+          <button class="btn btn--ghost" type="button" data-refresh>
+            <svg class="icon" aria-hidden="true"><use href="../assets/icons/sprite.svg#i-refresh"></use></svg>
+            <span class="btn__label">به‌روزرسانی</span>
+          </button>
+          <a class="btn btn--primary" href="blood-request-form.html">
+            <svg class="icon" aria-hidden="true"><use href="../assets/icons/sprite.svg#i-plus"></use></svg>
+            <span class="btn__label">درخواست جدید</span>
+          </a>
+        </div>
+      </div>
+
+      <section class="center-stats" aria-label="خلاصه وضعیت مرکز">
+        <article class="metric-card">
+          <div class="metric-card__top">
+            <span class="metric-card__icon metric-card__icon--coral">
+              <svg class="icon" aria-hidden="true"><use href="../assets/icons/sprite.svg#i-drop"></use></svg>
+            </span>
+            <span class="metric-card__hint" data-metric-hint="active">در حال پیگیری</span>
+          </div>
+          <div class="metric-card__value" data-metric="active">۰</div>
+          <div class="metric-card__label">درخواست فعال</div>
+        </article>
+
+        <article class="metric-card">
+          <div class="metric-card__top">
+            <span class="metric-card__icon metric-card__icon--amber">
+              <svg class="icon" aria-hidden="true"><use href="../assets/icons/sprite.svg#i-send"></use></svg>
+            </span>
+            <span class="metric-card__hint" data-metric-hint="pending">آماده فراخوان</span>
+          </div>
+          <div class="metric-card__value" data-metric="pending">۰</div>
+          <div class="metric-card__label">در انتظار فراخوان</div>
+        </article>
+
+        <article class="metric-card">
+          <div class="metric-card__top">
+            <span class="metric-card__icon">
+              <svg class="icon" aria-hidden="true"><use href="../assets/icons/sprite.svg#i-users"></use></svg>
+            </span>
+            <span class="metric-card__hint">از ابتدای امروز</span>
+          </div>
+          <div class="metric-card__value" data-metric="interested">۰</div>
+          <div class="metric-card__label">پاسخ مثبت داوطلبان</div>
+        </article>
+
+        <article class="metric-card">
+          <div class="metric-card__top">
+            <span class="metric-card__icon">
+              <svg class="icon" aria-hidden="true"><use href="../assets/icons/sprite.svg#i-hospital"></use></svg>
+            </span>
+            <span class="metric-card__hint">در درخواست‌های فعال</span>
+          </div>
+          <div class="metric-card__value" data-metric="units">۰</div>
+          <div class="metric-card__label">واحد مورد نیاز</div>
+        </article>
+      </section>
+
+      <section id="requests" aria-labelledby="requests-title">
+        <div class="section-label">
+          <h2 id="requests-title">درخواست‌های مرکز</h2>
+          <span class="section-label__meta" data-request-meta>در حال دریافت…</span>
+        </div>
+
+        <div class="toolbar" role="search">
+          <div class="toolbar__search">
+            <span class="input-group">
+              <svg class="icon" aria-hidden="true"><use href="../assets/icons/sprite.svg#i-search"></use></svg>
+              <input class="input" id="request-search" type="search" placeholder="جست‌وجوی گروه خونی، فرآورده یا یادداشت…" autocomplete="off" aria-label="جست‌وجوی درخواست‌ها" />
+            </span>
+          </div>
+
+          <div class="filter-chips" data-filter-group aria-label="فیلتر وضعیت">
+            <button class="filter-chip is-active" type="button" data-filter="all" aria-pressed="true">همه <span class="filter-chip__count" data-filter-count="all">۰</span></button>
+            <button class="filter-chip" type="button" data-filter="active" aria-pressed="false">فعال <span class="filter-chip__count" data-filter-count="active">۰</span></button>
+            <button class="filter-chip" type="button" data-filter="draft" aria-pressed="false">پیش‌نویس <span class="filter-chip__count" data-filter-count="draft">۰</span></button>
+            <button class="filter-chip" type="button" data-filter="urgent" aria-pressed="false">فوری <span class="filter-chip__count" data-filter-count="urgent">۰</span></button>
+            <button class="filter-chip" type="button" data-filter="closed" aria-pressed="false">بسته‌شده <span class="filter-chip__count" data-filter-count="closed">۰</span></button>
+          </div>
+
+          <label class="toolbar__sort">
+            <span class="sr-only">ترتیب نمایش</span>
+            <select class="select" id="request-sort" aria-label="ترتیب نمایش درخواست‌ها">
+              <option value="newest">جدیدترین</option>
+              <option value="urgency">بیشترین فوریت</option>
+              <option value="expiry">نزدیک‌ترین مهلت</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="request-list" data-request-list aria-live="polite">
+          <div class="skeleton" style="height: 96px; border-radius: 22px"></div>
+          <div class="skeleton" style="height: 96px; border-radius: 22px"></div>
+          <div class="skeleton" style="height: 96px; border-radius: 22px"></div>
+        </div>
+
+        <div class="empty-state" data-request-empty hidden>
+          <span class="empty-state__art"><svg class="icon" aria-hidden="true"><use href="../assets/icons/sprite.svg#i-drop"></use></svg></span>
+          <h3>درخواستی با این فیلتر پیدا نشد</h3>
+          <p>فیلتر یا عبارت جست‌وجو را تغییر دهید، یا یک درخواست تازه برای مرکز ثبت کنید.</p>
+          <a class="btn btn--soft" href="blood-request-form.html">
+            <svg class="icon" aria-hidden="true"><use href="../assets/icons/sprite.svg#i-plus"></use></svg>
+            <span class="btn__label">ثبت درخواست جدید</span>
+          </a>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <dialog class="drawer" id="request-drawer" data-backdrop-close aria-labelledby="drawer-title">
+    <div class="drawer__panel">
+      <div class="drawer__head">
+        <div class="drawer__title">
+          <span class="blood-badge" data-drawer-badge>O+</span>
+          <div>
+            <div class="drawer__tags" data-drawer-tags></div>
+            <h2 id="drawer-title" data-drawer-title>جزئیات درخواست</h2>
+            <p class="tiny muted" data-drawer-sub></p>
+          </div>
+        </div>
+        <button class="drawer__close" type="button" data-close-dialog aria-label="بستن جزئیات">
+          <svg class="icon" aria-hidden="true"><use href="../assets/icons/sprite.svg#i-x"></use></svg>
+        </button>
+      </div>
+
+      <div class="drawer-summary" data-drawer-summary></div>
+      <div class="timeline" data-drawer-timeline aria-label="روند درخواست"></div>
+
+      <div class="drawer-notes" data-drawer-notes></div>
+
+      <div class="segmented segmented--block drawer-tabs" role="tablist" aria-label="جزئیات فراخوان">
+        <button class="segmented__item is-active" type="button" role="tab" aria-selected="true" data-drawer-tab="candidates">کاندیدها</button>
+        <button class="segmented__item" type="button" role="tab" aria-selected="false" data-drawer-tab="responses">پاسخ داوطلبان</button>
+      </div>
+
+      <div class="drawer-tab-panel" data-drawer-panel="candidates">
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th scope="col">رتبه</th>
+                <th scope="col">داوطلب</th>
+                <th scope="col">فاصله</th>
+                <th scope="col">زمان رسیدن</th>
+                <th scope="col">بررسی سلامت</th>
+                <th scope="col">دسته</th>
+              </tr>
+            </thead>
+            <tbody data-candidates-body></tbody>
+          </table>
+        </div>
+        <p class="table-empty" data-candidates-empty hidden></p>
+      </div>
+
+      <div class="drawer-tab-panel" data-drawer-panel="responses" hidden>
+        <div data-responses-list></div>
+        <p class="table-empty" data-responses-empty hidden></p>
+      </div>
+
+      <div class="drawer-safety">
+        <svg class="icon" aria-hidden="true"><use href="../assets/icons/sprite.svg#i-shield"></use></svg>
+        <span>بررسی نهایی سلامت و واجد شرایط بودن هر داوطلب، پیش از اهدا و توسط پزشک مرکز انجام می‌شود.</span>
+      </div>
+
+      <div class="drawer-actions" data-drawer-actions></div>
+    </div>
+  </dialog>
+
+  <dialog class="modal" id="request-action-modal" data-backdrop-close aria-labelledby="action-title">
+    <div class="modal__panel">
+      <button class="modal__close" type="button" data-close-dialog aria-label="بستن">
+        <svg class="icon" aria-hidden="true"><use href="../assets/icons/sprite.svg#i-x"></use></svg>
+      </button>
+      <div class="modal__head">
+        <span class="eyebrow" data-action-eyebrow>تأیید عملیات</span>
+        <h2 id="action-title" data-action-title>این عملیات انجام شود؟</h2>
+        <p class="modal__desc" data-action-desc></p>
+      </div>
+      <div class="action-preview" data-action-preview></div>
+      <p class="modal__note" data-action-note></p>
+      <div class="modal__actions">
+        <button class="btn btn--ghost" type="button" data-close-dialog>انصراف</button>
+        <button class="btn btn--primary" type="button" data-action-confirm>
+          <span class="btn__label">تأیید</span>
+        </button>
+      </div>
+    </div>
+  </dialog>
+
+  <nav class="mobile-tabbar" aria-label="منوی پایین">
+    <a class="is-active" href="center-dashboard.html">
+      <svg class="icon" aria-hidden="true"><use href="../assets/icons/sprite.svg#i-home"></use></svg>
+      داشبورد
+    </a>
+    <a href="#requests">
+      <svg class="icon" aria-hidden="true"><use href="../assets/icons/sprite.svg#i-drop"></use></svg>
+      درخواست‌ها
+    </a>
+    <a href="blood-request-form.html">
+      <svg class="icon" aria-hidden="true"><use href="../assets/icons/sprite.svg#i-plus"></use></svg>
+      درخواست جدید
+    </a>
+    <a href="login.html" data-logout>
+      <svg class="icon" aria-hidden="true"><use href="../assets/icons/sprite.svg#i-logout"></use></svg>
+      خروج
+    </a>
+  </nav>
+</body>
+</html>
