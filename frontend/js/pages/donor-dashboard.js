@@ -1,6 +1,12 @@
 import { api, ApiError } from "../api-client.js";
 import { guard, initAppShell, updateUser } from "../auth.js";
 import {
+  cacheAvailability,
+  cacheDonorProfile,
+  getCachedAvailability,
+  getCachedDonorProfile,
+} from "../backend-state.js";
+import {
   componentMeta,
   daysBetween,
   escapeHtml,
@@ -48,6 +54,11 @@ async function init() {
     ]);
     me = meResponse.data;
     notifications = notifResponse.data ?? [];
+    // The contract has no GET endpoints for these; restore what the user saved earlier.
+    me.donor_profile = me.donor_profile ?? getCachedDonorProfile() ?? null;
+    me.availability = me.availability ?? getCachedAvailability() ?? null;
+    cacheDonorProfile(me.donor_profile);
+    cacheAvailability(me.availability);
     updateUser(me);
     renderProfile();
     renderAvailability();
@@ -60,25 +71,26 @@ async function init() {
 
 /* ---------- Profile / welcome ---------- */
 function renderProfile() {
-  const profile = me?.donor_profile;
-  if (!profile) return;
+  const profile = me?.donor_profile ?? null;
 
-  const blood = bloodLabel(profile.blood_group, profile.rh_factor);
+  const blood = profile ? bloodLabel(profile.blood_group, profile.rh_factor) : "ثبت نشده";
   document.querySelectorAll("[data-blood-group]").forEach((el) => (el.textContent = blood));
   const eyebrow = document.querySelector("[data-blood-eyebrow]");
-  if (eyebrow) eyebrow.textContent = `گروه خونی ${blood}`;
+  if (eyebrow) eyebrow.textContent = profile ? `گروه خونی ${blood}` : "گروه خونی ثبت نشده";
 
   const last = document.querySelector("[data-last-donation]");
-  if (last) last.textContent = faDate(profile.last_donation_date) || "ثبت نشده";
+  if (last) last.textContent = faDate(profile?.last_donation_date) || "ثبت نشده";
 
   const ago = document.querySelector("[data-last-donation-ago]");
   if (ago) {
-    const days = daysBetween(profile.last_donation_date);
+    const days = daysBetween(profile?.last_donation_date);
     ago.textContent = days === null ? "آخرین اهدای ثبت‌شده" : `آخرین اهدا، ${faNum(days)} روز پیش`;
   }
 
-  const checks = [profile.blood_group, profile.rh_factor, profile.last_donation_date, profile.sms_consent];
-  const percent = Math.round((checks.filter(Boolean).length / checks.length) * 100);
+  const checks = profile
+    ? [profile.blood_group, profile.rh_factor, profile.last_donation_date, profile.sms_consent]
+    : [];
+  const percent = profile ? Math.round((checks.filter(Boolean).length / checks.length) * 100) : 0;
   const ring = document.querySelector("[data-profile-ring]");
   if (ring) ring.style.setProperty("--p", percent);
   const percentText = document.querySelector("[data-profile-percent]");
@@ -133,34 +145,37 @@ function timeToIso(value, nextDay = false) {
 }
 
 availSwitch?.addEventListener("click", async () => {
-  if (!availability || availSwitch.disabled) return;
-  const nextStatus = availability.status === "available" ? "unavailable" : "available";
+  if (availSwitch.disabled) return;
+  const currentStatus = availability?.status === "available" ? "available" : "unavailable";
+  const nextStatus = currentStatus === "available" ? "unavailable" : "available";
   availSwitch.disabled = true;
   availSwitch.setAttribute("aria-busy", "true");
 
   const now = new Date();
-  const from = availability.available_from && new Date(availability.available_from) > now
+  const from = availability?.available_from && new Date(availability.available_from) > now
     ? availability.available_from
     : now.toISOString();
-  const until = availability.available_until && new Date(availability.available_until) > now
+  const until = availability?.available_until && new Date(availability.available_until) > now
     ? availability.available_until
     : new Date(now.getTime() + 4 * 3600 * 1000).toISOString();
 
   try {
     const { data } = await api.patch("/donors/me/availability", {
       status: nextStatus,
-      available_from: nextStatus === "available" ? from : null,
-      available_until: nextStatus === "available" ? until : null,
+      // The contract rejects time fields for `unavailable`; send them only when available.
+      ...(nextStatus === "available" ? { available_from: from, available_until: until } : {}),
     });
+    availability = data;
     me.availability = data;
+    cacheAvailability(data);
     renderAvailability();
     toast(nextStatus === "available" ? "آمادگی شما فعال شد." : "وضعیت آمادگی موقتاً غیرفعال شد.", {
       title: "وضعیت به‌روزرسانی شد",
     });
   } catch (error) {
     toast(error.message || "به‌روزرسانی وضعیت ناموفق بود.", { type: "error" });
-    availSwitch.disabled = false;
   } finally {
+    availSwitch.disabled = false;
     availSwitch.removeAttribute("aria-busy");
   }
 });
@@ -203,7 +218,9 @@ timeEditor?.addEventListener("submit", async (event) => {
   setButtonLoading(submit, true, "در حال ذخیره…");
   try {
     const { data } = await api.patch("/donors/me/availability", payload);
+    availability = data;
     me.availability = data;
+    cacheAvailability(data);
     renderAvailability();
     timeEditor.classList.remove("is-open");
     document.querySelector("[data-edit-times]")?.setAttribute("aria-expanded", "false");
@@ -226,7 +243,7 @@ function renderNotifications() {
   if (!list) return;
   list.hidden = false;
 
-  const active = notifications.filter((item) => item.request);
+  const active = notifications.filter((item) => item.status !== "cancelled");
   if (!active.length) {
     list.innerHTML = "";
     list.hidden = true;
@@ -247,29 +264,24 @@ function renderNotifications() {
 }
 
 function notificationTemplate(notification) {
-  const request = notification.request;
-  const meta = componentMeta(request.component_type);
-  const urgency = urgencyMeta(request.urgency);
-  const blood = bloodLabel(request.blood_group, request.rh_factor);
+  const meta = componentMeta(notification.component_type);
+  const urgency = urgencyMeta(notification.urgency);
+  const blood = bloodLabel(notification.blood_group, notification.rh_factor);
   const answered = Boolean(notification.response);
   const expired = new Date(notification.expires_at) <= new Date();
-  const tone = request.urgency === "critical" ? "critical" : request.urgency === "urgent" ? "urgent" : "";
-  const title = `${request.urgency === "critical" ? "نیاز فوری" : "فراخوان"} به ${meta.label} ${blood}`;
-  const centerName = request.center?.name ?? "مرکز اهدای خون";
-  const address = request.center?.address ?? "";
-  const desc =
-    request.notes ||
-    `${centerName} برای بیماران نیازمند، به ${faNum(request.units_needed)} واحد ${meta.label} ${blood} نیاز دارد.`;
+  const tone = notification.urgency === "critical" ? "critical" : notification.urgency === "urgent" ? "urgent" : "";
+  const title = `${notification.urgency === "critical" ? "نیاز فوری" : "فراخوان"} به ${meta.label} ${blood}`;
+  const centerName = notification.center_name ?? "مرکز اهدای خون";
+  const desc = `${centerName} برای بیماران نیازمند، به ${meta.label} ${blood} نیاز دارد.`;
 
   const metaItems = [
-    `<span><svg class="icon" aria-hidden="true"><use href="../assets/icons/sprite.svg#i-pin"></use></svg>${escapeHtml(centerName)}${address ? `، ${escapeHtml(address)}` : ""}</span>`,
-    `<span><svg class="icon" aria-hidden="true"><use href="../assets/icons/sprite.svg#i-route"></use></svg>${faNum(notification.distance_km)} کیلومتر · حدود ${faNum(notification.eta_minutes)} دقیقه</span>`,
+    `<span><svg class="icon" aria-hidden="true"><use href="../assets/icons/sprite.svg#i-pin"></use></svg>${escapeHtml(centerName)}</span>`,
     `<span><svg class="icon" aria-hidden="true"><use href="../assets/icons/sprite.svg#i-clock"></use></svg>${escapeHtml(relativeTime(notification.created_at))}</span>`,
   ].join("");
 
   const footer = answered
-    ? `<span class="answered-banner"><svg class="icon" aria-hidden="true"><use href="../assets/icons/sprite.svg#i-check"></use></svg>پاسخ شما: ${RESPONSE_LABELS[notification.response] ?? notification.response}</span>
-       <span class="tiny muted">${escapeHtml(relativeTime(notification.responded_at))}</span>`
+    ? `<span class="answered-banner"><svg class="icon" aria-hidden="true"><use href="../assets/icons/sprite.svg#i-check"></use></svg>پاسخ شما: ${RESPONSE_LABELS[notification.response.response] ?? notification.response.response}</span>
+       <span class="tiny muted">${escapeHtml(relativeTime(notification.response.responded_at))}</span>`
     : expired
       ? `<span class="countdown is-near"><svg class="icon" aria-hidden="true"><use href="../assets/icons/sprite.svg#i-clock"></use></svg>مهلت پاسخ تمام شد</span>`
       : `<span class="countdown" data-countdown="${notification.expires_at}"><svg class="icon" aria-hidden="true"><use href="../assets/icons/sprite.svg#i-clock"></use></svg>${remainingLabel(notification.expires_at)}</span>
@@ -292,7 +304,6 @@ function notificationTemplate(notification) {
         <div class="notification__head">
           <span class="notification__title">${escapeHtml(title)}</span>
           <span class="tag ${urgency.tag}">${urgency.label}</span>
-          ${request.units_needed ? `<span class="tag tag--muted">${faNum(request.units_needed)} واحد</span>` : ""}
         </div>
         <p class="notification__desc">${escapeHtml(desc)}</p>
         <div class="notification__meta">${metaItems}</div>
@@ -317,8 +328,7 @@ list?.addEventListener("click", async (event) => {
     await api.post(`/notifications/${id}/response`, { response });
     const item = notifications.find((notification) => notification.id === id);
     if (item) {
-      item.response = response;
-      item.responded_at = new Date().toISOString();
+      item.response = { response, responded_at: new Date().toISOString() };
     }
     card.querySelector(".notification__foot").innerHTML = `
       <span class="answered-banner"><svg class="icon" aria-hidden="true"><use href="../assets/icons/sprite.svg#i-check"></use></svg>پاسخ شما: ${RESPONSE_LABELS[response]}</span>
@@ -343,7 +353,7 @@ list?.addEventListener("click", async (event) => {
 });
 
 function renderNotificationsMeta() {
-  const active = notifications.filter((item) => item.request);
+  const active = notifications.filter((item) => item.status !== "cancelled");
   const pending = active.filter((item) => !item.response && new Date(item.expires_at) > new Date()).length;
   notifMeta.textContent = pending
     ? `${faNum(pending)} فراخوان در انتظار پاسخ`

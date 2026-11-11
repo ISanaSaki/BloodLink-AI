@@ -1,5 +1,6 @@
 import { api } from "../api-client.js";
 import { guard, initAppShell } from "../auth.js";
+import { fetchManagedCenter } from "../backend-state.js";
 import {
   componentMeta,
   faNum,
@@ -22,16 +23,11 @@ const notesCount = document.querySelector("[data-notes-count]");
 const submitButtons = [...form.querySelectorAll('button[type="submit"]')];
 
 async function init() {
-  try {
-    const { data } = await api.get("/users/me");
-    center = data.center ?? null;
-    if (center) {
-      document.querySelectorAll("[data-center-name]").forEach((el) => {
-        el.textContent = center.name;
-      });
-    }
-  } catch {
-    /* the form stays usable with demo defaults */
+  center = await fetchManagedCenter();
+  if (center) {
+    document.querySelectorAll("[data-center-name]").forEach((el) => {
+      el.textContent = center.name;
+    });
   }
 
   setDefaultExpiry();

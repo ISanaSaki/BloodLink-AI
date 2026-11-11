@@ -1,7 +1,7 @@
 import { DEMO_LATENCY, DEMO_OTP } from "./config.js";
 import { normalizePhone, isValidIranPhone, sleep } from "./utils.js";
 
-const DB_KEY = "hambkhoon_demo_db_v2";
+const DB_KEY = "hambkhoon_demo_db_v3";
 const ROLE_KEY = "blood_demo_role";
 
 export class MockApiError extends Error {
@@ -317,17 +317,15 @@ function seedDatabase() {
       eta_minutes: eta,
       distance_km: distance,
       eligibility_check_status: eligibility,
-      dispatch_stage: index < 5 ? "first_batch" : "backup",
-      rank: index + 1,
+      dispatch_stage: index < 5 ? 1 : 2,
     })),
-    [bloodRequests[3].id]: candidateRefs.slice(0, 6).map(([ref, eta, distance, eligibility], index) => ({
+    [bloodRequests[3].id]: candidateRefs.slice(0, 6).map(([ref, eta, distance, eligibility]) => ({
       donor_id: id(),
       donor_reference: ref,
       eta_minutes: eta,
       distance_km: distance,
       eligibility_check_status: eligibility,
-      dispatch_stage: "first_batch",
-      rank: index + 1,
+      dispatch_stage: 1,
     })),
   };
 
@@ -511,12 +509,20 @@ function enrichNotification(db, notification) {
   const request = db.blood_requests.find((item) => item.id === notification.request_id);
   const center = request ? db.centers.find((item) => item.id === request.center_id) : null;
   return {
-    ...notification,
-    request: request
-      ? {
-          ...request,
-          center: publicCenter(center),
-        }
+    id: notification.id,
+    request_id: notification.request_id,
+    channel: notification.channel,
+    status: notification.status,
+    created_at: notification.created_at,
+    expires_at: notification.expires_at,
+    center_id: center?.id ?? null,
+    center_name: center?.name ?? null,
+    component_type: request?.component_type ?? null,
+    blood_group: request?.blood_group ?? null,
+    rh_factor: request?.rh_factor ?? null,
+    urgency: request?.urgency ?? null,
+    response: notification.response
+      ? { response: notification.response, responded_at: notification.responded_at }
       : null,
   };
 }
@@ -537,8 +543,7 @@ function makeCandidateList(requestId) {
     eta_minutes: eta,
     distance_km: distance,
     eligibility_check_status: eligibility,
-    dispatch_stage: index < 5 ? "first_batch" : "backup",
-    rank: index + 1,
+    dispatch_stage: index < 5 ? 1 : 2,
     request_id: requestId,
   }));
 }
